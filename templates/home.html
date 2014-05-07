@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{%block head %}
+{{ super() }}
+<script>
+  $( "#upload_form" ).submit(function( event ) {
+  alert( "Handler for .submit() called." );
+  event.preventDefault();
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class = "header>"
+    <h1>Startup Search Engine</h1>
+    <div class="container">
+
+          <form method="POST" action="search/asdf" id = "upload_form">
+                  <input id="searchbox" type="text" 
+                  name="searchTerm" size = "50"
+                  placeholder="What's your idea?"><br>
+
+                  <select name="category_code">
+                    <option value="default" disabled="disabled"
+                    selected="selected">Choose an Industry</option>
+                    {% for category_code  in list %}
+                    <option value="a">{{category_code}}</option>
+                    {% endfor %}
+                  </select>
+                  <input id="submit" type="submit" value="Search">
+
+
+          </form>
+    </div>
+
+{% endblock %}

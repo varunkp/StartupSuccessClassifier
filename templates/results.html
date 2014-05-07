@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      
+       <title>Startup Search Engine | Results</title>
+       <meta name="author" content="PJ Loury">
+       <link rel="stylesheet" type="text/css" href="static/css/main.css" />
+
+       <script type="text/javascript">
+  
+
+  </script>
+
+  </head>
+  <body>
+
+    <div class = "title>"
+    <h1>Results for "{{searchTerm}} "</h1>
+    <div class="container">
+      <table>
+          <th>
+            <td> Name </td>
+            <td> Relevance </td>
+            <td> Total Funding </td>
+            <td> Year Founded</td>
+            <td> Success? </td>
+          </th>
+
+          {% for element  in results %}
+
+          <tr>
+            <td>
+              <img src="{{element["image"]}}">
+            </td>
+   
+            <td>
+              {{element["name"]}}
+            </td>
+
+            <td>
+               {{element["relevance"]}}
+            </td>
+
+            <td>
+              {{element["founded_year"]}}
+            </td>
+          </tr>
+
+          {% endfor %}
+
+          <h1>
+            <!-- <img src="http://crunchbase.com/{{image_path}}"> -->
+          </h1>
+    </div>
+
+  <footer>
+  </footer>
+  </body>
+</html>
