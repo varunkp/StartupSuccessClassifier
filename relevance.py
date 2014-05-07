@@ -105,12 +105,13 @@ def getRelevance(companiesList,searchQuery):
 		company_tags = company['tag_list']
 		company_tags_string = ' '.join(map(str, company_tags))
 		# print company_tags_string
-		relevances[company_name] = cosine_similarity(searchQuery, company_tags_string, idfs)
+		relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
 	return relevances
   #companyDict["tag_list"]
   #companyDict
 
 returned = getRelevance(test_companies_list, test_query)
+# returned.update()
 # print returned
 
 import operator
