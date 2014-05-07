@@ -5,10 +5,9 @@ import os
 from bs4 import BeautifulSoup
 import simplejson
 import json
-import html2text
+#import html2text
 
-fn = 'master3'
-data = pd.read_csv(fn+'.csv',error_bad_lines=False)
+
 api_key = 'ndcq6rwvpenbagu7p9rkxpw6'
 
 #currentDir = os.path.dirname(os.path.abspath(__file__))
@@ -21,24 +20,29 @@ data["image2"] = " "
 data["image3"] = " "
 data["number_of_employees"] = " "
 data["office_latitude"] = " "
-data["office_longitude"] = " "
+data["office_longitude"] = " " 
+
 row = -1
 
 initial = time.time()
-for company in data['name']:
+for company in data['name'][row+1:]:
   row = row+1
 
   company = unicode(company, errors='ignore')
-  #company = "AB Group"
+  #company = "Illumix Software"
 
   startGET = time.time()
   
   url1 = 'http://api.crunchbase.com/v/1/company/'+company+'.js?api_key='+api_key
   r = requests.get(url1)
-  if (r.status_code!= 200):
+  if (r.status_code!= 200) or r.text is None:
     continue
 
-  returned_json = json.loads(r.text, strict= False)
+  #print r.text
+  try:
+    returned_json = json.loads(r.text, strict= False)
+  except ValueError:
+    continue
 
   #returned_json = r.json()
   #print returned_json
@@ -67,14 +71,15 @@ for company in data['name']:
 
   '''
 
+  
   if returned_json["overview"] is not None:   # and "overview" in returned_json
     
     cleanedHTML= BeautifulSoup((''.join(returned_json["overview"])))
 
-    text = html2text.html2text(cleanedHTML)
+    #text = html2text.html2text(cleanedHTML)
     #text = html2text.html2text(returned_json["overview"])
-    print text  
-    data['overview'][row] = text
+    #print cleanedHTML  
+    data['overview'][row] = cleanedHTML
 
 
   if returned_json["tag_list"] is not None: # and "tag_list" in returned_json
@@ -88,7 +93,6 @@ for company in data['name']:
     data["image2"][row] =returned_json["image"]["available_sizes"][1][1]
     data["image3"][row] =returned_json["image"]["available_sizes"][2][1]
 
-
   if len(returned_json["offices"])>0 and returned_json["offices"] is not None: # and "offices" in returned_json
     data["office_latitude"][row] = returned_json["offices"][0]["latitude"]
     data["office_longitude"][row] = returned_json["offices"][0]["longitude"]
@@ -96,8 +100,13 @@ for company in data['name']:
   endGET = time.time()
   print company + " took " + str((endGET-startGET))
 
+  if row == 20000:
+    end20000 = time.time()
+    print "20,000 companies took" + str(end20000-initial)
 
-data.to_csv('SECOND_OVERNIGHT_MASTER.csv')
+  data.to_csv('32729_34999_MASTER.csv')
+
+  
 final = time.time()
-print "5,000 companies took" + str(final-initial)
+print "All companies took" + str(final-initial)
 
