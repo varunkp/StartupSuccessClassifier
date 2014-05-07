@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Startup Finder</title>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'> -->
+	<script src="startup_viz.js"></script>
+	<link rel="stylesheet" type="text/css" href="startup_viz.css">
+</head>
+
+
+<body>
+	<div id="wrapper">
+		<!-- Page title -->
+		<div id="website_header">
+			<h1>HAVE A STARTUP IDEA?</h1>
+		</div>
+
+		<!-- Search bar and button -->
+		<div id="keyword_search_bar_container">
+			<input id="keyword_search_bar" placeholder="What's your idea?" type="text"/>
+			<button type="button" id="search_button">Find Similar Companies</button>
+		</div>
+
+		<!-- Search results -->
+		<div id="results_container">
+			<div id="results_header">
+				<h2>Similar Companies</h2>
+				<table id="results_table">
+					<tr class="results_table_header_row">
+						<th class="image">Logo</th>
+						<th>Name</th>
+						<th class="bar">Relevance</th>
+						<th class="number">Year Founded</th>
+						<th class="number">Funding Total</th>
+						<th class="status">Status</th>
+						<th>Location</th>
+					</tr>
+					<!--
+					<tr class="results_table_row">
+						<td>Logo</td>
+						<td>Skydrive</td>
+						<td>Score 90</td>
+						<td>2007</td>
+						<td>$27M</td>
+						<td>Closed</td>
+						<td>WA, USA</td>
+					</tr>
+					<tr class="results_table_row">
+						<td>Logo</td>
+						<td>Dropbox</td>
+						<td>Score 50</td>
+						<td>2001</td>
+						<td>$390M</td>
+						<td>IPO</td>
+						<td>CA, USA</td>
+					</tr>
+					<tr class="results_table_row">
+						<td>Logo</td>
+						<td>Streem</td>
+						<td>Score 25</td>
+						<td>2001</td>
+						<td>$0.7M</td>
+						<td>Operating</td>
+						<td>CA, USA</td>
+					</tr>
+					-->
+				</table>
+
+			</div>
+
+		</div>
+
+	</div>
+
+</body>
+
+</html>
