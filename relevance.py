@@ -99,24 +99,27 @@ def cosine_similarity(string1, string2, idfs):
 # print cosine_similarity(test_query, "peanut butter and jelly sandwich hardware", idfs)
 
 def getRelevance(companiesList,searchQuery):
-	relevances = {}
-	for company in companiesList:
-		company_name = company['name']
-		company_tags = company['tag_list']
-		company_tags_string = ' '.join(map(str, company_tags))
-		# print company_tags_string
-		relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
-	return relevances
-  #companyDict["tag_list"]
-  #companyDict
+    relevances = {}
+    for company in companiesList:
+        company_name = company['name']
+        company_tags = company['tag_list']
+        company_tags_string = ' '.join(map(str, company_tags))
+        # print company_tags_string
+        #relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
+        #return relevances
+        company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
+    newList = sorted(companiesList, key=lambda k: k['relevance']) 
+    return newList
+	
+
 
 returned = getRelevance(test_companies_list, test_query)
 # returned.update()
 # print returned
 
-import operator
-sorted_returned = sorted(returned.iteritems(), key=operator.itemgetter(1), reverse=True)
-print sorted_returned
+#import operator
+#sorted_returned = sorted(returned.iteritems(), key=operator.itemgetter(1), reverse=True)
+#print sorted_returned
 
 
 

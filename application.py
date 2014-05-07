@@ -11,6 +11,7 @@ import requests
 import json
 from os import environ
 from flask.ext.restful import Resource, Api
+import relevance
 
 application = flask.Flask(__name__)
 app = application
@@ -26,8 +27,6 @@ relevance_threshhold = 0
 
 fn = 'data/0_10000_MASTER.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
-
-
 
 class Search(Resource):
   def get(self):
@@ -54,22 +53,26 @@ def stuff():
 def hello(restQuery):
   
   if 'searchTerm' in request.form:
+    print "rest API"
     searchTerm = request.form['searchTerm']
   else:
     searchTerm = restQuery 
-
   
   if 'category_code' in request.form:
     category_code = request.form['category_code']
   else:
     category_code = 'all'
   
-  companyNames = getCompaniesList(searchTerm, numResults, category_code)
-  results = getResults(companyNames)
+  #Generate A JSON Object of Most Relevant Result
+  companiesList = getCompaniesList(searchTerm, numResults, category_code)
+  results = getResults(companiesList)
+  sortedResults = getListSortedByRelevance(results,searchTerm)
+  
   #return flask.render_template(
    #         'results.html',searchTerm=searchTerm,results=results)
-  return json.dumps(results, ensure_ascii=False)
   #return flask.jsonify(results)
+  return json.dumps(sortedResults, ensure_ascii=False)
+
 
 def getCompaniesList(query,num,category_code):
   combined_results = []
@@ -81,6 +84,7 @@ def getCompaniesList(query,num,category_code):
 
     returned_json = json.loads(r.text, strict= False)
     
+
     for resultNum in range(0,len(returned_json["results"])-1):
       individual_company = {}
       
@@ -88,38 +92,41 @@ def getCompaniesList(query,num,category_code):
       and returned_json["results"][resultNum]["namespace"] == "company":
         company = returned_json["results"][resultNum]
         print resultNum
-        if getRelevance(company) > relevance_threshhold:
-          individual_company["name"]=company["name"]
-          #if company["image"]["available_sizes"] is not None:
-          if "image" in company and company["image"] is not None:
-            img = company["image"]["available_sizes"][0][1]
-            print img
-            individual_company["image"] = img
-            #individual_company["image1"]= company["image"]["available_sizes"][0][1]
-          if "tag_list" in company and company["tag_list"] is not None:
-            tl = company["tag_list"]
-            print tl
-            individual_company["tag_list"] = img
-          combined_results.append(individual_company)
+        
+        individual_company["name"]=company["name"]
 
-  #print combined_results
+        if "image" in company and company["image"] is not None:
+          img = company["image"]["available_sizes"][0][1]
+          print img
+          individual_company["image"] = img
+          #individual_company["image1"]= company["image"]["available_sizes"][0][1]
+        else:
+          individual_company["image"] = None
+
+        individual_company["tag_list"] = getTagListFromPandas(individual_company["name"])
+
+        combined_results.append(individual_company)
+
   return combined_results
 
-def getRelevance(company):
-  return 1
+def getTagListFromPandas(companyName):
+  #VARUN IMPLEMENT THIS SHIZ
+  #inputs company name as a string
+  #outputs company's tag list as a python list/whatever form you need for your relevance score 
+  return ["bob","the","builder"]
+
+def getListSortedByRelevance(companiesList,searchQuery):
+  return relevance.getRelevance(companiesList, searchQuery)
 
 def getResults(companiesList):
   i = 1
+
   for companyDict in companiesList:
-    companyDict['relevance'] = 10*i
     companyDict['founded_year'] = 1950+ 10*i
     i = i+1
     #companyDict["image1"] = data[ data["name"] == companyDict["name"]]["image1"]
     #print companyDict["image1"]
-
-
   return companiesList
-  #ORDER THE LIST ON THE 'relevance' key
 
 def error():
   print "OH SHI ERROR"
