@@ -1,0 +1,112 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+@font-face {
+	font-family: "Open Sans";
+	src: url(./Open_Sans/OpenSans-Regular.ttf) format("truetype");
+}
+
+#wrapper {
+	width: 1024px;
+	margin: 0 auto;
+}
+
+#website_header {
+	height: 70px;
+	width: 100%;
+	/*background-color: lightgray;*/
+	text-align: center;
+	border-bottom: 1px solid #6699CC;
+	padding: 10px 0px 0px 0px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	color: #318CE7;
+}
+
+#keyword_search_bar_container {
+	width: 100%;
+	border-bottom: 1px solid #6699CC;
+}
+
+#keyword_search_bar {
+	height: 20px;
+	width: 600px;
+	margin: 30px 212px 30px 212px;
+	padding-left: 5px;
+	text-align: left;
+}
+
+#search_button {
+	height: 20px;
+	width: 150px;
+	margin: 0px 437px 30px 437px;
+}
+
+#results_container {
+	width: 100%;
+	text-align: left;
+	font-family: 'Open Sans', sans-serif;
+}
+
+#results_header {
+	margin: 15px 0px 0px 0px;
+}
+
+h2 {
+	font-size: 20px;
+	color: #318CE7;
+}
+
+#results_table {
+	width: 1024px;
+	margin: 15px 0px 0px 0px;
+	table-layout: fixed;
+}
+
+#results_table tr {
+}
+
+#results_table th {
+	color: #318CE7;
+	padding: 1px 1px 1px 5px;
+	text-align: center;
+}
+
+#results_table td {
+	padding: 1px 5px 1px 5px;
+	height: 60px;
+	/*overflow: scroll;*/
+}
+
+th.image {
+	width: 150px;
+}
+
+th.bar {
+	width: 100px;
+}
+
+th.number {
+	width: 100px;
+}
+
+th.status {
+	width: 100px;
+}
+
+td.relevance{
+
+}
+
+table
+{
+	border-collapse:collapse;
+}
+
+table, td, th
+{
+	border: 1px solid #6699CC;
+}
