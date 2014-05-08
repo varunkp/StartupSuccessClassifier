@@ -75,7 +75,8 @@ api_key = 'ndcq6rwvpenbagu7p9rkxpw6'
 numResults = 50
 relevance_threshhold = 0
 #returned_json = {}
-idfs = {}
+idfs_ov = {}
+idfs_tag = {}
 
 fn = 'data/master_all.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
@@ -103,11 +104,15 @@ def searchAPI(restQuery):
   
   #Generate A JSON Object of Most Relevant Result
   companiesList = getCompaniesList(searchTerm, numResults, category_code)
-  global idfs
-  if OVERVIEW:
-    idfs = find_idfs_overview(companiesList)
-  else:
-    idfs = find_idfs(companiesList)
+  global idfs_ov
+  global idfs_tag
+  # if OVERVIEW:
+  #   idfs = find_idfs_overview(companiesList)
+  # else:
+  #   idfs = find_idfs(companiesList)
+  idfs_ov = find_idfs_overview(companiesList)
+  idfs_tag = find_idfs(companiesList)
+
 
   # print idfs
 
@@ -293,16 +298,28 @@ def getRelevance(companiesList,searchQuery):
     relevances = {}
     for company in companiesList:
         company_name = company['name']
+
         company_tags = company['tag_list']
         company_tags_string = ' '.join(map(str, company_tags))
-        global idfs
+
+        company_ov = company['overview']
+        company_ov_string = ' '.join(map(str, company_ov))
+
+        global idfs_ov
+        global idfs_tag
         # print company_tags_string
         #relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
         #return relevances
-        company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
-    newList = sorted(companiesList, key=lambda k: k['relevance'], reverse=True)
-    for l in newList:
-      print l
+        company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs_tag)
+        company["relevanceByOverview"] = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs_ov)
+    newList = sorted(companiesList, key=lambda k: k['relevanceByOverview'], reverse=True)
+    print '--------------------------------------------SPITTING OUT COMPANY RELEVANCES ---------------------------------------'
+    for i, l in enumerate(newList):
+      print 'Company Number ', i
+      print 'Company Name: ' + l['name']
+      print 'Overview Relevance ', l['relevanceByOverview']
+      print 'Tag Relevance ', l['relevance']
+      print '--------------------NEXT COMPANY -------------------------'
     return newList
   
 def getRelevanceByOverview(companiesList,searchQuery):
@@ -338,10 +355,13 @@ def getOverviewFromPandas(companyName):
   return [str(html2text.html2text(ov_string))]
 
 def getListSortedByRelevance(companiesList,searchQuery):
-  if OVERVIEW:
-    return getRelevanceByOverview(companiesList, searchQuery)
-  else:
-    return getRelevance(companiesList, searchQuery)
+  # if OVERVIEW:
+  #   return getRelevanceByOverview(companiesList, searchQuery)
+  # else:
+  #   return getRelevance(companiesList, searchQuery)
+
+ return getRelevance(companiesList, searchQuery)
+
 
 def getResults(companiesList):
   i = 1
