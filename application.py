@@ -208,17 +208,11 @@ d = data_rel.applymap(lambda x: np.nan if isinstance(x, basestring) and x.isspac
 data_all_cleansed = d.fillna('a')
 
 def getTagListFromPandas(companyName):
-  companyName = unicode(companyName, errors='ignore')
   locate_row = data_all_cleansed[data_all_cleansed['name'] == companyName]
-  # tl = str(locate_row['tag_list'])
-  # print type(tl)
-
   tl = locate_row['tag_list'].tolist()
   tl_string = ' '.join(map(str, tl))
-
   return [str(tl_string)]
-  # tl_string = ' '.join(map(str, tl))
-  # return simple_tokenize(tl_string)
+
   #VARUN IMPLEMENT THIS SHIZ
   #inputs company name as a string
   #outputs company's tag list as a python list/whatever form you need for your relevance score 

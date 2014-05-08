@@ -113,8 +113,7 @@ def getRelevance(companiesList,searchQuery):
 	
 
 
-returned = getRelevance(test_companies_list, test_query)
-# returned.update()
+# returned = getRelevance(test_companies_list, test_query)
 # print returned
 
 #import operator
