@@ -28,12 +28,13 @@ relevance_threshhold = 0
 fn = 'data/0_10000_MASTER.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
 
-class Search(Resource):
+class SearchAPI(Resource):
   def get(self):
         restQuery = request.form['restQuery']
-        return hello(restQuery)
+        print restQuery
+        return searchAPI(restQuery)
 #api.add_resource(TodoSimple, '/<string:todo_id>')
-api.add_resource(Search, '/search2')
+api.add_resource(SearchAPI, '/api')
 
 def getCategory_codes():
   category_codes=list(data.columns.values)
@@ -49,8 +50,35 @@ def home():
 def stuff():
   return home()
 
-@app.route('/hello', methods=['POST','GET'])
-def hello(restQuery):
+
+@app.route('/search', methods=['POST','GET'])
+def search():
+
+  if 'searchTerm' in request.form:
+    print "rest API"
+    searchTerm = request.form['searchTerm']
+  else:
+    searchTerm = restQuery 
+  
+  if 'category_code' in request.form:
+    category_code = request.form['category_code']
+  else:
+    category_code = 'all'
+  
+  #Generate A JSON Object of Most Relevant Result
+  companiesList = getCompaniesList(searchTerm, numResults, category_code)
+  results = getResults(companiesList)
+  sortedResults = getListSortedByRelevance(results,searchTerm)
+  
+  return flask.render_template(
+   'results.html',searchTerm=searchTerm,results=results)
+  #return flask.jsonify(results)
+  #return json.dumps(sortedResults, ensure_ascii=False)
+
+
+
+@app.route('/searchAPI', methods=['POST','GET'])
+def searchAPI(restQuery):
   
   if 'searchTerm' in request.form:
     print "rest API"
