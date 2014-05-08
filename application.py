@@ -6,16 +6,13 @@
 import string
 import flask
 from flask import request, flash, jsonify, Flask
-import pandas as pd
 import requests
 import json
-from os import environ
 from flask.ext.restful import Resource, Api
 import relevance
-
+import pandas as pd
 import numpy as np
 
-#import flask.ext.cors
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
@@ -93,7 +90,7 @@ fn = 'data/master_all.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
 
 class SearchAPI(Resource):
-  def get(self):
+  def post(self):
         restQuery = request.form['restQuery']
         print restQuery
         response= searchAPI(restQuery)

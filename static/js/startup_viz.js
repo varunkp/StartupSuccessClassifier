@@ -506,16 +506,20 @@ var handleSearchTerms = function() {
 	// part to try to get around the CORS stuff.
 
 	
+	console.log("doin ajax work")
 	$.ajax({
+		type: "POST",
 		dataType: "json",
-		url: "http://startup-search.herokuapp.com/searchAPI",
+		//url: "http://startup-search.herokuapp.com/searchAPI",
+		url: "http://localhost:5000/searchAPI",
 		data: dataToSend,
 		success: function(data) {
 			console.log("ajax request done");
 			console.log(data);
 		}
 	});
-	
+	console.log("DONE with ajax work")	
+
 
 	/*
 	$.getJSON("http://startup-search.herokuapp.com/search2?callback=?", dataToSend, function(data) {
