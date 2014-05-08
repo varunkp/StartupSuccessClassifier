@@ -420,66 +420,155 @@ var getAllCompanyDataHelper = function(resp) {
 	// create wrapper for quarterly funding line graph
 	modalContent.append("div").attr("id", "results_modal_graph_container");
 
-	/*
+	var graphContainer = d3.select("#results_modal_graph_container");
+
+	// set up graph title 
+	graphContainer.append("div").attr("id","results_modal_graph_title").append("h2").text("Total Funding Over Time (Quarterly)");
+	
 	// dimensions : width: 650px; height: 368px;
 	var m = [80, 80, 80, 80]; // margins
-	var w = 650 - m[1] - m[3];
-	var h = 368 - m[2] - m[4];
+	//var w = 650 - m[1] - m[3];
+	var w = 490;
+	//var h = 368 - m[2] - m[4];
+	//var h1 = 368 - m[2] - m[4];
+	var h = 208;
 
 	var data = allQuartersList;
 
 	// X scale will fit all values from data[] within pixels 0-w
-	var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
+	var scaleX = d3.scale.linear().domain([0, data.length]).range([0, w]);
 
 	// Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
 	var maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
-	console.log(maxRaised);
-	var y = d3.scale.linear().domain([0, maxRaised]).range([h, 0]);
+	/*
+	console.log("maxRaised: " + maxRaised);
+	console.log("h1: " + h1);
+	console.log(typeof(h1));
+	console.log("w: " + w);
+	console.log(typeof(w));
+	*/
+
+	//console.log(typeof(maxRaised));
+	//var scaleY = d3.scale.linear().domain([0, maxRaised]).range([h, 0]);
+
+	//1107200000
+	//1000000000000
+	//var linearScale = d3.scale.linear().domain([0,1107200000]).range([208,0]);
+	var linearScale = d3.scale.linear().domain([0,maxRaised]).range([h,0]);
+	//console.log("linearScale(0): " + linearScale(0));
+	//console.log("linearScale(900): " + linearScale(900));
+
+	//console.log("scaleY(0): " + scaleY(0));
+	//console.log("scaleY(110720000): " + scaleY(110720000));
 
 	// create a line function that can convert data[] into x and y points
 	var line = d3.svg.line()
 		// assign the X function to plot our line as we wish
 		.x(function(d,i) { 
+			//console.log("in x:");
 			// verbose logging to show what's actually being done
-			console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+			//console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + scaleX(i) + ' using our xScale.');
 			// return the X coordinate where we want to plot this datapoint
-			return x(i); 
+			return scaleX(i); 
 		})
 		.y(function(d) { 
+			//console.log("in y:");
+			var raisedMoney = d.raised_total;
+			//console.log(raisedMoney);
+			//console.log(typeof(raisedMoney));			
 			// verbose logging to show what's actually being done
-			console.log('Plotting Y value for data point: ' + d.raised_total + ' to be at: ' + y(d.raised_total) + " using our yScale.");
+			//console.log('Plotting Y value for data point: ' + raisedMoney + ' to be at: ' + linearScale(raisedMoney) + " using our yScale.");
 			// return the Y coordinate where we want to plot this datapoint
-			return y(d.raised_total); 
+			return linearScale(raisedMoney);
 		});
 
+	
 	// Add an SVG element with the desired dimensions and margin.
-	var graph = d3.select("#results_modal_graph_container").append("svg:svg")
-		.attr("width", w + m[1] + m[3])
-		.attr("height", h + m[0] + m[2])
-	    .append("svg:g")
-	    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");	
+	var graph = d3.select("#results_modal_graph_container");
 
+	// add SVG graph (canvas) container for line graph
+	graph.append("svg:svg")
+		.attr("width", "620px")
+		.attr("height", "330px")
+		.attr("id", "svg_canvas")
+		.style("position", "absolute")
+		.style("top", "19px")
+		.style("left", "15px")
+		.style("border", "1px solid black");
+
+	// add SVG graph in coordinate space
+	var svgCanvas = d3.select("#svg_canvas");
+	svgCanvas.append("svg:g")
+		.attr("id", "graph_group")
+	    .attr("x", "200")
+	    .attr("y", "200")
+	    .attr("transform", "translate(" + 120 + "," + 75 + ")");
+
+	  	
+
+
+	var ticksArr = $.map(allQuartersList, function(data, index) {
+		//console.log(data);
+		var toReturn = " ";
+		if (data.funded_quarter == 1) {
+			var currYear = data.funded_year;
+			toReturn = "'" + data.funded_year.toString().substring(2);	
+			return toReturn;
+		} 
+		return toReturn;
+	});
+
+
+	var rangeArr = [];
+	for (var l = 0; l < allQuartersList.length; l++) {
+		rangeArr.push(scaleX(l));
+	}
+
+
+	// change above to use ordinal scale
+	var xTickScale = d3.scale.ordinal().rangeRoundBands([0, w]);
 	// create x-axis
-	var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+	var xAxis = d3.svg.axis().scale(xTickScale).orient("bottom").ticks(allQuartersList.length).tickSubdivide(true).tickSize(-h);
+	xTickScale.domain(ticksArr);
+
+	// TODO: set up ticks correctly
+
+
+
+	var group = d3.select("#graph_group");
+
+	// TODO: label x-axis
+
 	// Add the x-axis.
-	graph.append("svg:g")
-	      .attr("class", "x axis")
-	      .attr("transform", "translate(0," + h + ")")
-	      .call(xAxis);	
+	group.append("svg:g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + h + ")")
+	    .attr("x", "200")
+	    .attr("y", "200")
+	    .call(xAxis);	
+
+
 
 	// create left yAxis
-	var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+	var yAxisLeft = d3.svg.axis().scale(linearScale).ticks(4).orient("left").tickFormat(function(d) {
+		var toReturn = "$" + d;
+		toReturn = toReturn.substring(0, toReturn.length-6);
+		toReturn = toReturn + "M";
+		return toReturn;
+	}).tickSize(-w);
+
 	// Add the y-axis to the left
-	graph.append("svg:g")
+	group.append("svg:g")
 	      .attr("class", "y axis")
-	      .attr("transform", "translate(-25,0)")
+	      .attr("transform", "translate(-5,0)")
 	      .call(yAxisLeft);
 
 	// Add the line by appending an svg:path element with the data line we created above
 	// do this AFTER the axes above so that the line is above the tick-lines
-	graph.append("svg:path").attr("d", line(data));
+	group.append("svg:path").attr("d", line(data));
 	
-	*/
+	
+	
 	
 	// set up functionality for close button
 	$("#close_modal").click(function() {
