@@ -12,10 +12,14 @@ from flask.ext.restful import Resource, Api
 # import relevance
 import pandas as pd
 import numpy as np
-
+import re
+import math
 from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
+import html2text
+
+OVERVIEW = False
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -68,9 +72,10 @@ api = Api(app)
 api_key = 'ndcq6rwvpenbagu7p9rkxpw6'
 #user_key = '41bf8e5a3861db3fd954d9b31ca64e36'
 
-numResults = 20
+numResults = 50
 relevance_threshhold = 0
 #returned_json = {}
+idfs = {}
 
 fn = 'data/master_all.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
@@ -98,6 +103,14 @@ def searchAPI(restQuery):
   
   #Generate A JSON Object of Most Relevant Result
   companiesList = getCompaniesList(searchTerm, numResults, category_code)
+  global idfs
+  if OVERVIEW:
+    idfs = find_idfs_overview(companiesList)
+  else:
+    idfs = find_idfs(companiesList)
+
+  # print idfs
+
   #results = getResults(companiesList)
   sortedResults = getListSortedByRelevance(companiesList,searchTerm)
   
@@ -164,6 +177,9 @@ def getCompaniesList(query,num,category_code):
         
         individual_company["name"]=company["name"]
 
+        # if "overview" in company and company["overview"] is not None:
+        #   individual_company["overview"] = company["overview"]
+
         if "image" in company and company["image"] is not None:
           img = company["image"]["available_sizes"][0][1]
           #print img
@@ -173,6 +189,7 @@ def getCompaniesList(query,num,category_code):
           individual_company["image"] = None
 
         individual_company["tag_list"] = getTagListFromPandas(individual_company["name"])
+        individual_company["overview"] = getOverviewFromPandas(individual_company["name"])
 
         combined_results.append(individual_company)
 
@@ -194,7 +211,6 @@ STOPWORDS_PATH = "stopwords.txt"
 stopwords = set(load_lines(STOPWORDS_PATH)) 
 
 split_regex = r'\W+'
-
 
 def simple_tokenize(string):
     return [t for t in re.split(split_regex, string.lower()) if len(t)]
@@ -230,9 +246,21 @@ def find_idfs(companiesList):
                 seen.add(t)
     return { t: float(len(companiesList)) / counts[t] for t in counts }
 
+def find_idfs_overview(companiesList):
+    counts = {}
+    for companyDict in companiesList:
+        seen = set()
+        tl = companyDict['overview']
+        # tl_string = ' '.join(map(str, tl))
+        tokenized_tl = tokenize(tl)
+        print tokenized_tl
+        for t in tokenized_tl:
+            if t not in seen:
+                counts.setdefault(t, 0.0)
+                counts[t] += 1
+                seen.add(t)
+    return { t: float(len(companiesList)) / counts[t] for t in counts }
 
-idfs = find_idfs(companiesList)
-# print idfs
 
 def tfidf(tokens, idfs):
     tfs = tf(tokens)
@@ -265,14 +293,14 @@ def getRelevance(companiesList,searchQuery):
     for company in companiesList:
         company_name = company['name']
         company_tags = company['tag_list']
-        print company_tags
         company_tags_string = ' '.join(map(str, company_tags))
-        print company_tags_string
+        global idfs
         # print company_tags_string
         #relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
         #return relevances
         company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
-    newList = sorted(companiesList, key=lambda k: k['relevance']) 
+    newList = sorted(companiesList, key=lambda k: k['relevance'], reverse=True)
+    print newList
     return newList
   
 def getRelevanceByOverview(companiesList,searchQuery):
@@ -281,11 +309,13 @@ def getRelevanceByOverview(companiesList,searchQuery):
         company_name = company['name']
         company_ov = company['overview']
         company_ov_string = ' '.join(map(str, company_ov))
+        global idfs
         # print company_tags_string
         #relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
         #return relevances
         company["relevanceByOverview"] = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs)
-    newList = sorted(companiesList, key=lambda k: k['relevanceByOverview']) 
+    newList = sorted(companiesList, key=lambda k: k['relevanceByOverview'], reverse=True) 
+    print newList
     return newList
 
 def getTagListFromPandas(companyName):
@@ -294,9 +324,18 @@ def getTagListFromPandas(companyName):
   tl_string = ' '.join(map(str, tl))
   return [str(tl_string)]
 
+def getOverviewFromPandas(companyName):
+  locate_row = data_all_cleansed[data_all_cleansed['name'] == companyName]
+  ov = str(locate_row['overview'])
+  ov = unicode(ov,errors='ignore')
+  ov_string = ' '.join(map(str, ov))
+  return str(html2text.html2text(ov))
 
 def getListSortedByRelevance(companiesList,searchQuery):
-  return getRelevance(companiesList, searchQuery)
+  if OVERVIEW:
+    return getRelevanceByOverview(companiesList, searchQuery)
+  else:
+    return getRelevance(companiesList, searchQuery)
 
 def getResults(companiesList):
   i = 1
