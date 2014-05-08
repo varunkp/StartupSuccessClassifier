@@ -80,6 +80,8 @@ idfs_tag = {}
 
 fn = 'data/master_all.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
+data = data.applymap(lambda x: np.nan if isinstance(x, basestring) and x.isspace() else x)
+data = data.fillna('a')
 
 class SearchAPI(Resource):
   def post(self):
@@ -319,6 +321,8 @@ def getRelevance(companiesList,searchQuery):
       print 'Company Name: ' + l['name']
       print 'Overview Relevance ', l['relevanceByOverview']
       print 'Tag Relevance ', l['relevance']
+      print 'Tag List ' + str(l['tag_list'])
+      print 'Overview ' + str(l['overview'])
       print '--------------------NEXT COMPANY -------------------------'
     return newList
   
