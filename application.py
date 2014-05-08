@@ -19,7 +19,7 @@ from flask import make_response, request, current_app
 from functools import update_wrapper
 import html2text
 
-OVERVIEW = False
+OVERVIEW = True
 
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
@@ -251,9 +251,10 @@ def find_idfs_overview(companiesList):
     for companyDict in companiesList:
         seen = set()
         tl = companyDict['overview']
-        # tl_string = ' '.join(map(str, tl))
-        tokenized_tl = tokenize(tl)
-        print tokenized_tl
+        # print tl
+        tl_string = ' '.join(map(str, tl))
+        tokenized_tl = tokenize(tl_string)
+        # print tokenized_  tl
         for t in tokenized_tl:
             if t not in seen:
                 counts.setdefault(t, 0.0)
@@ -300,7 +301,8 @@ def getRelevance(companiesList,searchQuery):
         #return relevances
         company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
     newList = sorted(companiesList, key=lambda k: k['relevance'], reverse=True)
-    print newList
+    for l in newList:
+      print l
     return newList
   
 def getRelevanceByOverview(companiesList,searchQuery):
@@ -315,7 +317,8 @@ def getRelevanceByOverview(companiesList,searchQuery):
         #return relevances
         company["relevanceByOverview"] = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs)
     newList = sorted(companiesList, key=lambda k: k['relevanceByOverview'], reverse=True) 
-    print newList
+    for l in newList:
+      print l
     return newList
 
 def getTagListFromPandas(companyName):
@@ -326,10 +329,13 @@ def getTagListFromPandas(companyName):
 
 def getOverviewFromPandas(companyName):
   locate_row = data_all_cleansed[data_all_cleansed['name'] == companyName]
-  ov = str(locate_row['overview'])
-  ov = unicode(ov,errors='ignore')
+  ov = locate_row['overview'].tolist()
   ov_string = ' '.join(map(str, ov))
-  return str(html2text.html2text(ov))
+  # ov = unicode(ov, errors='ignore')
+  # print ov_string
+  ov_string = unicode(ov_string,errors='ignore')
+  # return 'happy sad'
+  return [str(html2text.html2text(ov_string))]
 
 def getListSortedByRelevance(companiesList,searchQuery):
   if OVERVIEW:
