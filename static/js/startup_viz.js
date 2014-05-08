@@ -345,33 +345,142 @@ var getAllCompanyDataHelper = function(resp) {
 		}
 	}
 	
-	//console.log(fundingList);
 	// keep necessary data from fundingList and convert dates to quarters
 	var o = d3.scale.ordinal().domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).range([1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4]);
 	var trimmedFundingList = [];
 	for (var k = 0; k < fundingList.length; k++) {
 		var currElement = fundingList[k];
-		console.log(currElement);
+		//console.log(currElement);
 		var currQuarter = o(currElement.funded_month);
+		var currAmount = currElement.raised_amount;
+		if (currAmount == null) {
+			currAmount = 0;
+		}
 		var tempObj = {
 			funded_year: currElement.funded_year,
 			funded_quarter: currQuarter,
-			raised_amount: currElement.raised_amount
+			raised_amount: currAmount,
 		};
 		trimmedFundingList.push(tempObj);
 	}
+	//console.log(trimmedFundingList);
+
+	// create dataArr for each quarter
+	var startQuarter = [trimmedFundingList[0].funded_quarter, trimmedFundingList[0].funded_year];
+	var endQuarter = [trimmedFundingList[trimmedFundingList.length-1].funded_quarter, trimmedFundingList[trimmedFundingList.length-1].funded_year];
+	//console.log("startQuarter: " + startQuarter);
+	//console.log("endQuarter: " + endQuarter);
+
+	var allQuartersList = [];
+	var previousAmount = 0;
+	var index = 0; // to step through trimmedFundingList
+
+	for (var year = startQuarter[1]; year <= endQuarter[1]; year++) {
+		for (var quar = 1; quar <= 4; quar++) {
+			if (year == startQuarter[1] && quar < startQuarter[0]) {
+				//console.log("year: " + year);
+				//console.log("quar: " + quar);
+				continue;
+			}
+			else if (year == endQuarter[1] && quar > endQuarter[0]) {
+				break;
+			}
+
+			if (year == trimmedFundingList[index].funded_year && quar == trimmedFundingList[index].funded_quarter) {
+				// means got funding this round
+				//allQuartersList.push(trimmedFundingList[index]);
+				
+				var amount = previousAmount + trimmedFundingList[index].raised_amount;
+				//var amount = previousAmount;
+				var obj = {
+					funded_year: year,
+					funded_quarter: quar,
+					raised_total: amount
+				}
+				allQuartersList.push(obj);
+				//previousAmount = previousAmount + trimmedFundingList[index].raised_amount;
+				previousAmount = amount;
+
+				// advance for next time
+				index = index + 1;
+			} else { // no funding this time, keep same raised_amount
+				var amount = previousAmount;
+				var obj = {
+					funded_year: year,
+					funded_quarter: quar,
+					raised_total: amount
+				};
+				allQuartersList.push(obj);
+			}
+		}
+	}
+
 
 
 	// create wrapper for quarterly funding line graph
 	modalContent.append("div").attr("id", "results_modal_graph_container");
+
+	/*
 	// dimensions : width: 650px; height: 368px;
 	var m = [80, 80, 80, 80]; // margins
 	var w = 650 - m[1] - m[3];
 	var h = 368 - m[2] - m[4];
 
+	var data = allQuartersList;
+
+	// X scale will fit all values from data[] within pixels 0-w
+	var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
+
+	// Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
+	var maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
+	console.log(maxRaised);
+	var y = d3.scale.linear().domain([0, maxRaised]).range([h, 0]);
+
+	// create a line function that can convert data[] into x and y points
+	var line = d3.svg.line()
+		// assign the X function to plot our line as we wish
+		.x(function(d,i) { 
+			// verbose logging to show what's actually being done
+			console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+			// return the X coordinate where we want to plot this datapoint
+			return x(i); 
+		})
+		.y(function(d) { 
+			// verbose logging to show what's actually being done
+			console.log('Plotting Y value for data point: ' + d.raised_total + ' to be at: ' + y(d.raised_total) + " using our yScale.");
+			// return the Y coordinate where we want to plot this datapoint
+			return y(d.raised_total); 
+		});
+
+	// Add an SVG element with the desired dimensions and margin.
+	var graph = d3.select("#results_modal_graph_container").append("svg:svg")
+		.attr("width", w + m[1] + m[3])
+		.attr("height", h + m[0] + m[2])
+	    .append("svg:g")
+	    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");	
+
+	// create x-axis
+	var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+	// Add the x-axis.
+	graph.append("svg:g")
+	      .attr("class", "x axis")
+	      .attr("transform", "translate(0," + h + ")")
+	      .call(xAxis);	
+
+	// create left yAxis
+	var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+	// Add the y-axis to the left
+	graph.append("svg:g")
+	      .attr("class", "y axis")
+	      .attr("transform", "translate(-25,0)")
+	      .call(yAxisLeft);
+
+	// Add the line by appending an svg:path element with the data line we created above
+	// do this AFTER the axes above so that the line is above the tick-lines
+	graph.append("svg:path").attr("d", line(data));
 	
-
-
+	*/
+	
 	// set up functionality for close button
 	$("#close_modal").click(function() {
 		$("#results_modal_container").hide();
@@ -386,7 +495,7 @@ var dateToQuarter = function(month, year) {
 
 var handleSearchTerms = function() {
 	searchTermStr = $("#keyword_search_bar").val();
-	//console.log(searchTermStr);
+	console.log(searchTermStr);
 	var dataToSend = {
 		restQuery: searchTermStr
 	};
@@ -396,17 +505,21 @@ var handleSearchTerms = function() {
 	// if there was anything I was missing. I tried adding the '?callback=?'
 	// part to try to get around the CORS stuff.
 
-	/*
+	
+	console.log("doin ajax work")
 	$.ajax({
-		dataType: "jsonp",
-		url: "http://startup-search.herokuapp.com/search2/?callback=?",
+		type: "POST",
+		dataType: "json",
+		//url: "http://startup-search.herokuapp.com/searchAPI",
+		url: "http://localhost:5000/searchAPI",
 		data: dataToSend,
 		success: function(data) {
 			console.log("ajax request done");
 			console.log(data);
 		}
 	});
-	*/
+	console.log("DONE with ajax work")	
+
 
 	/*
 	$.getJSON("http://startup-search.herokuapp.com/search2?callback=?", dataToSend, function(data) {
