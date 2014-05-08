@@ -17,7 +17,6 @@ from datetime import timedelta
 from flask import make_response, request, current_app
 from functools import update_wrapper
 
-
 def crossdomain(origin=None, methods=None, headers=None,
                 max_age=21600, attach_to_all=True,
                 automatic_options=True):
@@ -59,24 +58,11 @@ def crossdomain(origin=None, methods=None, headers=None,
         return update_wrapper(wrapped_function, f)
     return decorator
 
-#from flask.ext.cors import origin
-
-'''
-try:
-  import flask_cors.origin # support local usage without installed package
-  print "1st"
-except:
-   # this is how you would normally import
-  print "2nd"
-'''
-
-
 application = flask.Flask(__name__)
 app = application
 app.secret_key = 'some_secret'
 app.debug = True
 api = Api(app)
-
 #api.decorators=[cors.crossdomain(origin='*')]
 
 api_key = 'ndcq6rwvpenbagu7p9rkxpw6'
@@ -92,11 +78,9 @@ data = pd.read_csv(fn,error_bad_lines=False)
 class SearchAPI(Resource):
   def post(self):
         restQuery = request.form['restQuery']
-        print restQuery
+        #print restQuery
         response= searchAPI(restQuery)
         return response
-        #response = make_response(response) 
-        #response.headers['Access-Control-Allow-Origin'] = "*" return response
 #api.add_resource(TodoSimple, '/<string:todo_id>')
 #api.add_resource(SearchAPI, '/api')
 api.add_resource(SearchAPI, '/searchAPI')
@@ -104,12 +88,8 @@ api.add_resource(SearchAPI, '/searchAPI')
 @app.route('/searchAPI', methods=['POST','GET'])
 @crossdomain(origin='*')
 def searchAPI(restQuery):
-  
-  if 'searchTerm' in request.form:
-    print "rest API"
-    searchTerm = request.form['searchTerm']
-  else:
-    searchTerm = restQuery 
+
+  searchTerm = restQuery 
   
   if 'category_code' in request.form:
     category_code = request.form['category_code']
@@ -118,18 +98,15 @@ def searchAPI(restQuery):
   
   #Generate A JSON Object of Most Relevant Result
   companiesList = getCompaniesList(searchTerm, numResults, category_code)
-  results = getResults(companiesList)
-  sortedResults = getListSortedByRelevance(results,searchTerm)
+  #results = getResults(companiesList)
+  sortedResults = getListSortedByRelevance(companiesList,searchTerm)
   
-  #return flask.render_template(
-   #         'results.html',searchTerm=searchTerm,results=results)
-  #return flask.jsonify(results)
   return json.dumps(sortedResults, ensure_ascii=False)
 
 
 def getCategory_codes():
-  category_codes=list(data.columns.values)
-  return category_codes
+  categories = data_all_cleansed.groupby('category_code').groups.keys()
+  return categories
 
 @app.route('/', methods=['GET'])
 def home():  
@@ -189,7 +166,7 @@ def getCompaniesList(query,num,category_code):
 
         if "image" in company and company["image"] is not None:
           img = company["image"]["available_sizes"][0][1]
-          print img
+          #print img
           individual_company["image"] = img
           #individual_company["image1"]= company["image"]["available_sizes"][0][1]
         else:
@@ -213,9 +190,6 @@ def getTagListFromPandas(companyName):
   tl_string = ' '.join(map(str, tl))
   return [str(tl_string)]
 
-  #VARUN IMPLEMENT THIS SHIZ
-  #inputs company name as a string
-  #outputs company's tag list as a python list/whatever form you need for your relevance score 
 
 def getListSortedByRelevance(companiesList,searchQuery):
   return relevance.getRelevance(companiesList, searchQuery)
