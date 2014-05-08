@@ -312,18 +312,26 @@ def getRelevance(companiesList,searchQuery):
         # print company_tags_string
         #relevances[company_name] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs)
         #return relevances
-        company["relevance"] = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs_tag)
-        company["relevanceByOverview"] = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs_ov)
-    newList = sorted(companiesList, key=lambda k: k['relevanceByOverview'], reverse=True)
+        rel_by_tag = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs_tag)
+        rel_by_ov = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs_ov)
+        company["relevanceByTag"] = rel_by_tag
+        company["relevanceByOverview"] = rel_by_ov
+        if rel_by_ov != 0 and rel_by_tag != 0:
+          company['relevance'] = 0.5 * (rel_by_ov + rel_by_tag)
+        else:
+          company['relevance'] = max(rel_by_ov, rel_by_tag)
+
+    newList = sorted(companiesList, key=lambda k: k['relevance'], reverse=True)
     print '--------------------------------------------SPITTING OUT COMPANY RELEVANCES ---------------------------------------'
     for i, l in enumerate(newList):
+      print '--------------------NEXT COMPANY -------------------------'
       print 'Company Number ', i
       print 'Company Name: ' + l['name']
       print 'Overview Relevance ', l['relevanceByOverview']
-      print 'Tag Relevance ', l['relevance']
+      print 'Tag Relevance ', l['relevanceByTag']
       print 'Tag List ' + str(l['tag_list'])
       print 'Overview ' + str(l['overview'])
-      print '--------------------NEXT COMPANY -------------------------'
+      print 'Total Relevance ', l['relevance']
     return newList
   
 def getRelevanceByOverview(companiesList,searchQuery):
