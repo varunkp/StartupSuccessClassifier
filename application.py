@@ -12,6 +12,9 @@ import json
 from os import environ
 from flask.ext.restful import Resource, Api
 import relevance
+
+import numpy as np
+
 #import flask.ext.cors
 from datetime import timedelta
 from flask import make_response, request, current_app
@@ -70,6 +73,7 @@ except:
   print "2nd"
 '''
 
+
 application = flask.Flask(__name__)
 app = application
 app.secret_key = 'some_secret'
@@ -85,7 +89,7 @@ numResults = 20
 relevance_threshhold = 0
 #returned_json = {}
 
-fn = 'data/0_10000_MASTER.csv'
+fn = 'data/master_all.csv'
 data = pd.read_csv(fn,error_bad_lines=False)
 
 class SearchAPI(Resource):
@@ -200,11 +204,22 @@ def getCompaniesList(query,num,category_code):
 
   return combined_results
 
+
+fn_rel = 'data/relevant_master_all.csv'
+data_rel = pd.read_csv(fn_rel, error_bad_lines=False, header=0)
+d = data_rel.applymap(lambda x: np.nan if isinstance(x, basestring) and x.isspace() else x)
+data_all_cleansed = d.fillna('a')
+
 def getTagListFromPandas(companyName):
+  locate_row = data_all_cleansed[data_all_cleansed['name'] == companyName]
+  tl = locate_row['tag_list'].tolist()
+  tl_string = ' '.join(map(str, tl))
+  return [tl_string]
+  # tl_string = ' '.join(map(str, tl))
+  # return simple_tokenize(tl_string)
   #VARUN IMPLEMENT THIS SHIZ
   #inputs company name as a string
   #outputs company's tag list as a python list/whatever form you need for your relevance score 
-  return ["bob","the","builder"]
 
 def getListSortedByRelevance(companiesList,searchQuery):
   return relevance.getRelevance(companiesList, searchQuery)
