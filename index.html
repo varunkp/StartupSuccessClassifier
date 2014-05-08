@@ -7,6 +7,7 @@
 	<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'> -->
 	<script src="startup_viz.js"></script>
 	<link rel="stylesheet" type="text/css" href="startup_viz.css">
+	<link rel="stylesheet" type="text/css" href="fontello.css">
 </head>
 
 
@@ -14,12 +15,12 @@
 	<div id="wrapper">
 		<!-- Page title -->
 		<div id="website_header">
-			<h1>HAVE A STARTUP IDEA?</h1>
+			<h1>Have a Startup Idea?</h1>
 		</div>
 
 		<!-- Search bar and button -->
 		<div id="keyword_search_bar_container">
-			<input id="keyword_search_bar" placeholder="What's your idea?" type="text"/>
+			<input id="keyword_search_bar" class="keyword_search_bar" placeholder="What's your idea?" type="text"/>
 			<button type="button" id="search_button">Find Similar Companies</button>
 		</div>
 
@@ -27,15 +28,16 @@
 		<div id="results_container">
 			<div id="results_header">
 				<h2>Similar Companies</h2>
+
 				<table id="results_table">
 					<tr class="results_table_header_row">
 						<th class="image">Logo</th>
-						<th>Name</th>
+						<th class="name">Name</th>
 						<th class="bar">Relevance</th>
 						<th class="number">Year Founded</th>
 						<th class="number">Funding Total</th>
 						<th class="status">Status</th>
-						<th>Location</th>
+						<th class="location">Location</th>
 					</tr>
 					<!--
 					<tr class="results_table_row">
@@ -67,10 +69,22 @@
 					</tr>
 					-->
 				</table>
-
 			</div>
 
+			<!-- Company Modal -->
+			<!-- 
+			<div id="overlay"></div>
+			-->
+			<!--
+			<div id="results_modal_container">
+				<div id="results_modal_content">
+					<p>Some text</p>
+				</div>
+			</div>
+			-->
 		</div>
+
+
 
 	</div>
 
