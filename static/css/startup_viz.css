@@ -1,0 +1,337 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+@font-face {
+	font-family: "Open Sans";
+	src: url(./font/OpenSans-Regular.ttf) format("truetype");
+}
+
+body {
+	background: #F6F7F8;
+}
+
+#wrapper {
+	width: 1024px;
+	margin: 0 auto;
+	padding-bottom: 30px;
+}
+
+#website_header {
+	height: 70px;
+	width: 100%;
+	/*background-color: lightgray;*/
+	text-align: center;
+	border-bottom: 1px solid #6699CC;
+	padding: 10px 0px 0px 0px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 20px;
+	font-weight: bold;
+	color: #318CE7;
+}
+
+#keyword_search_bar_container {
+	width: 100%;
+	border-bottom: 1px solid #6699CC;
+}
+
+#keyword_search_bar {
+	height: 20px;
+	width: 600px;
+	margin: 30px 212px 30px 212px;
+	padding-left: 5px;
+	text-align: left;
+}
+
+#search_button {
+	height: 20px;
+	width: 150px;
+	margin: 0px 437px 30px 437px;
+}
+
+#results_container {
+	width: 100%;
+	text-align: left;
+	font-family: 'Open Sans', sans-serif;
+	position: absolute;
+}
+
+#results_header {
+	margin: 15px 0px 0px 0px;
+}
+
+h2 {
+	font-size: 20px;
+	color: #318CE7;
+}
+
+#results_table {
+	width: 1024px;
+	margin: 15px 0px 0px 0px;
+	table-layout: fixed;
+}
+
+#results_table tr {
+	text-align: center;
+}
+
+#results_table th {
+	color: #318CE7;
+	padding: 1px 1px 1px 5px;
+	text-align: center;
+}
+
+#results_table td {
+	padding: 1px 5px 1px 5px;
+	height: 60px;
+	overflow: scroll;
+}
+
+th.image {
+	width: 158px;
+}
+
+th.name {
+}
+
+th.bar {
+	/*width: 100px;*/
+	width: 120px;
+}
+
+th.number {
+	width: 120px;
+}
+
+th.status {
+	width: 120px;
+}
+
+th.location {
+	width: 120px;
+}
+
+table
+{
+	border-collapse: collapse;
+}
+
+table, td, th
+{
+	border: 1px solid #6699CC;
+}
+
+#results_modal_container {
+	position: absolute;
+	width: 1000px;
+	height: 470px;
+	/*background:rgba(0,0,0,0.95);*/
+	background: #F6F7F8;
+	z-index: 50;
+	left: 12px;
+	top: 0px;
+	border: 1px solid #6699CC;
+}
+
+#results_modal_content {
+	margin: 0px 0px 0px 0px;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 1000px;
+	height: 470px;
+}
+
+#results_modal_header {
+	width: 100%;
+	height: 102px;
+	border-bottom: 1px solid #6699CC;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	color: #318CE7;
+}
+
+#results_modal_logo {
+	width: 160px;
+	height: 90px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	text-align: center;
+}
+
+#results_modal_profile {
+	width: 169px;
+	height: 90px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	left: 180px;
+	top: 5px;
+}
+
+.results_modal_button {
+	width: 160px;
+	height: 23px;
+	border: 1px solid #6699CC;
+	position: absolute;
+	text-align: center;
+	color: #318CE7;
+	cursor: pointer;
+}
+
+#results_modal_finance_data {
+	width: 350px;
+	height: 368px;
+	border-right: 1px solid #6699CC;
+	position: absolute;
+	top: 102px;
+	left: 0px;
+	color: #318CE7;
+}
+
+#results_modal_finance_title {
+	width: 350px;
+	height: 30px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	top: 10px;
+	left: 0px;
+	color: #318CE7;	
+	text-align: center;
+}
+
+#results_modal_finance_total_funding {
+	width: 200px;
+	height: 30px;
+	/*border-left: 1px solid #6699CC;*/
+	position: absolute;
+	top: 60px;
+	left: 10px;
+	color: #318CE7;	
+}
+
+#results_modal_finance_funding_round {
+	width: 250px;
+	height: 30px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	top: 120px;
+	left: 10px;
+	color: #318CE7;	
+}
+
+#results_modal_investor_title {
+	width: 80px;
+	height: 30px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	top: 180px;
+	left: 10px;
+	color: #318CE7;	
+}
+
+#results_modal_investor_container {
+	width: 230px;
+	height: 170px;
+	border: 1px solid #6699CC;
+	position: absolute;
+	top: 180px;
+	left: 90px;
+	color: #318CE7;	
+	overflow: scroll;
+	padding: 5px 10px 5px 10px;
+}
+
+#results_modal_graph_container {
+	width: 650px;
+	height: 368px;
+	position: absolute;
+	top: 102px;
+	left: 350px;
+	color: #318CE7;
+}
+
+#results_modal_overview_container {
+	width: 400px;
+	height: 300px;
+	position: absolute;
+	top: 29px;
+	left: 565px;
+	color: #318CE7;
+	border: 1px solid #6699CC;
+	z-index: 100;
+	background-color: #FFFFFF;
+	padding: 5px 10px 5px 10px;
+	overflow: scroll;
+}
+
+#overlay {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    opacity: 0.5;
+}
+
+#close_modal_container {
+	position: absolute;
+	width: 24px;
+	height: 24px;
+	top: -13px;
+	left: 989px;
+	/*background: #F6F7F8;*/
+}
+
+#close_modal {
+	position: absolute;
+	top: 1px;
+	left: 4px;
+	cursor: pointer;
+}
+
+/* tell the SVG path to be a thin blue line without any area fill */
+path {
+	stroke: steelblue;
+	stroke-width: 1;
+	fill: none;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.x.axis line {
+  stroke: lightgrey;
+}
+
+.x.axis .minor {
+  stroke-opacity: .5;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.y.axis line, .y.axis path {
+  fill: none;
+  stroke: #000;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
