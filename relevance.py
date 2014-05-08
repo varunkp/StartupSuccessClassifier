@@ -3,11 +3,11 @@ import math
 
 test_query = "peanut butter, hardware, successful"
 test_companies_list = [ 
-						{'name': 'apple', 'tag_list': ['big', 'consumer', 'successful', 'hardware']},
-						{'name': 'facebook', 'tag_list': ['big', 'mobile', 'successful', 'app', 'software']},
-						{'name': 'amazon', 'tag_list': ['big', 'successful', 'books']},
-						{'name': 'palantir', 'tag_list': ['big', 'successful', 'software']},
-						{'name': 'skippy', 'tag_list': ['peanut butter', 'smooth', 'creamy', 'crunchy']}
+						{'name': 'apple', 'tag_list': ['big, consumer, successful, hardware']},
+						{'name': 'facebook', 'tag_list': ['big, mobile, successful, app, software']},
+						{'name': 'amazon', 'tag_list': ['big, successful, books']},
+						{'name': 'palantir', 'tag_list': ['big, successful, software']},
+						{'name': 'skippy', 'tag_list': ['peanut butter, smooth, creamy, crunchy']}
 						]
 
 # for c in test_companies_list:
