@@ -195,8 +195,8 @@ def getCompaniesList(query,num,category_code):
       if "namespace" in returned_json["results"][resultNum] \
       and returned_json["results"][resultNum]["namespace"] == "company":
         company = returned_json["results"][resultNum]
-        print "company:"
-        print company
+        # print "company:"
+        # print company
 
 
         #print resultNum
