@@ -13,9 +13,9 @@
 
 //OAuth User Secret:b07e0c4d-0db4-4992-8850-374affa3ee5a
 
-var urlList = ["http://api.crunchbase.com/v/1/company/dropbox.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/facebook.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/microsoft.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/box.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?"];
+var urlList = ["http://api.crunchbase.com/v/1/company/dropbox.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/facebook.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/microsoft.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/box.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?", "http://api.crunchbase.com/v/1/company/splunk.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?"];
 var jsonList = [];
-var relevanceArray = [95, 50, 75, 5];
+var relevanceArray = [95, 50, 75, 5, 25];
 
 $(document).ready(function() {
 
@@ -24,18 +24,27 @@ $(document).ready(function() {
 	// render results table when user hits 'Enter' in searchbar
 	$("#keyword_search_bar").keypress(function(e) {
 		if (e.keyCode == 13) {
-			handleSearchTerms();
-			showResults();
+			//handleSearchTerms(); // V2
+			showResults(); // V1
 		}
 	});
 
+	// set up functionality for 'esc' key
+	$(document).keyup(function(e) {
+		if (e.keyCode == 27) {
+			$("#results_modal_container").hide();
+			$("#overlay").hide();
+		}
+	});		
+
 	// render results table when user clicks on button
 	$("#search_button").click(function() {
-		handleSearchTerms();
-		showResults();
+		//handleSearchTerms(); // V2
+		showResults(); // V1
 	}); 
 });
 
+// V1
 var showResults = function() {
 	// add code to reset results_container before rendering new results table
 
@@ -46,6 +55,7 @@ var showResults = function() {
 	}	
 }
 
+// V1
 var getCompanyData = function(callback, index) {	
 	$.ajax({
 		url: urlList[index],
@@ -58,6 +68,7 @@ var getCompanyData = function(callback, index) {
 	});
 };
 
+// V1
 var tempFunc = function(resp) {
 	//console.log("got to tempFunc");
 	//console.log("URL list length: " + urlList.length);
@@ -87,44 +98,57 @@ var sortCompaniesByRelevance = function(companyList) {
 
 var i = 0;
 var lastClicked = null;
+var counter = 0;
 
+// V1 and V2
 var parseCompanyData = function(currCompany) {
 	//console.log("inside parseCompanyData()");
 
 	if (typeof(currCompany) != 'undefined' && currCompany != null) {
 
-		//console.log(currCompany);
+		var logoURL = currCompany.image.available_sizes[0][1]; // V1
+		//var logoURL = currCompany.image; // V2
+		var logoHeight = currCompany.image.available_sizes[0][0][0]; // V1
+		//var logoHeight = "150"; // V2
+		var logoWidth = currCompany.image.available_sizes[0][0][1]; // V1
+		//var logoWidth = "57"; // V2
 
-		var logoURL = currCompany.image.available_sizes[0][1];
-		var logoHeight = currCompany.image.available_sizes[0][0][0];
-		var logoWidth = currCompany.image.available_sizes[0][0][1];
-		var name = currCompany.name;
+		var name = currCompany.name; // V1 and V2
 
-		var relevance = currCompany.relevance; // get this from ML output
+		var relevance = currCompany.relevance; // V1 and V2
 		i++;
 
-		var yearFounded = currCompany.founded_year;
-		var totalFunding = currCompany.total_money_raised;
-		var status = currCompany.ipo;
+		var yearFounded = currCompany.founded_year; // V1
+		//var yearFounded = 2008; // V2
+		var totalFunding = currCompany.total_money_raised; // V1
+		//var totalFunding = "$1.5M"; // V2
+		var status = currCompany.ipo; // V1
+		//var status = "Operating"; // V2
 		if (typeof(status) != 'undefined' && status != null) {
 			status = "IPO";
 		} else {
 			status = "Operating";
 		}
 
-		var country = currCompany.offices[0].country_code;
-		var state = currCompany.offices[0].state_code;
-		var location = null;
+		var country = currCompany.offices[0].country_code; // V1
+		//var country = "USA"; // V2
+		var state = currCompany.offices[0].state_code; // V1
+		//var state = "CA"; // V2
+		var location = null; // V1 and V2
 		if (typeof(state) != 'undefined' && state != null) {
 			location = state + ', ' + country;
 		} else {
 			location = country;
 		}
 
-		var permalink = currCompany.permalink; // use this as id of row
+		var permalink = currCompany.permalink; // use this as id of row // V1
+		//var permalink = "dropbox" + counter; // V2
+		//counter = counter + 1; // V2
+
+		//console.log("done setting up everything up until permalink");
 
 		var colorScale = d3.scale.linear().domain([0,100]).interpolate(d3.interpolateHsl).range(["#FF0000","#3CF057"]);
-		var sizeScale = d3.scale.linear().domain([0,100]).range([0,94]);
+		var sizeScale = d3.scale.linear().domain([0,100]).range([1,94]);
 		var relevanceColor = colorScale(relevance);
 		var barSize = Math.floor(sizeScale(relevance));
 
@@ -142,13 +166,27 @@ var parseCompanyData = function(currCompany) {
 		var htmlString = "<td class=\"logo\">" + logoString + "</td><td>" + name + "</td><td class=\"relevance\">" + relevanceContainer + "</td><td>" + yearFounded + "</td><td>" + totalFunding + "</td><td>" + status + "</td><td>" + location + "</td>";
 
 		// append row to table
+		//console.log(permalink);
 		table.append("tr").attr("class", "results_table_row").attr("id", permalink).html(htmlString);
+		//console.log(htmlString);
+		//;
+
+		//.html(htmlString);
+		//var permalinkString = "#" + permalink;
+		//console.log(permalinkString);
+		//var currRow = d3.select(permalinkString).html("<h1>WHY OH WHY</h1>");
+		//console.log(table);
+
+		//console.log("htmlString:");
+		//console.log(htmlString);
+		//console.log(permalink);
+		//console.log("done setting up everything up");
 
 		/* 
 		* Now that table exists, add interactivity and modals.
 		* This is the 2nd main execution loop.
 		*/
-
+		
 		// need the .unbind('click') because for some reason each row has 4 events bound to it instead of 1
 		$(".results_table_row").unbind('click').click(function(e) {
 			var currId = $(this).attr("id");
@@ -167,20 +205,22 @@ var parseCompanyData = function(currCompany) {
 			getAllCompanyData(getAllCompanyDataHelper, searchUrl)
 
 		});
-
+		
 	}
 };
 
 var getAllCompanyData = function(callback, url) {
-	//console.log("about to make ajax request");
+	console.log("beginning of getAllCompanyData()");
 	$.ajax({
 		url: url,
 		dataType: 'json',
 		async: false,
 		success: function(data) {
+			console.log("done with ajax request in getAllCompanyData()");
 			callback(data);
 		}
 	});
+	console.log("end of getAllCompanyData()");
 };
 
 var getAllCompanyDataHelper = function(resp) {
@@ -332,15 +372,15 @@ var getAllCompanyDataHelper = function(resp) {
 			} else if (investor.organization != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.organization.permalink;
 				var txt = investor.organization.name;	
-				investorList.append("li").append("a").attr("href", str).text(txt);			
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);			
 			} else if (investor.person != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.person.permalink;
 				var txt = investor.person.name;
-				investorList.append("li").append("a").attr("href", str).text(txt);	
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);	
 			} else if (investor.financial_org != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.financial_org.permalink;
 				var txt = investor.financial_org.name;
-				investorList.append("li").append("a").attr("href", str).text(txt);	
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);	
 			}
 		}
 	}
@@ -505,8 +545,6 @@ var getAllCompanyDataHelper = function(resp) {
 	    .attr("transform", "translate(" + 120 + "," + 75 + ")");
 
 	  	
-
-
 	var ticksArr = $.map(allQuartersList, function(data, index) {
 		//console.log(data);
 		var toReturn = " ";
@@ -574,13 +612,10 @@ var getAllCompanyDataHelper = function(resp) {
 	$("#close_modal").click(function() {
 		$("#results_modal_container").hide();
 		$("#overlay").hide();
+		$(this).unbind();
 	});
 
 };
-
-var dateToQuarter = function(month, year) {
-
-}
 
 var handleSearchTerms = function() {
 	searchTermStr = $("#keyword_search_bar").val();
@@ -588,36 +623,35 @@ var handleSearchTerms = function() {
 	var dataToSend = {
 		restQuery: searchTermStr
 	};
+	handleSearchTermsHelper(tempFunc2, dataToSend);
+};
 
-	// PJ: This is where the call to retrieve the data from the API should be
-	// Both of the below are doing the same thing, I just split them up to see
-	// if there was anything I was missing. I tried adding the '?callback=?'
-	// part to try to get around the CORS stuff.
+var tempFunc2 = function(resp) {
+	console.log("in tempFunc2()");
+	console.log(resp);
 
-	
-	console.log("doin ajax work")
+	for (var j = 0; j < resp.length; j++) {
+		parseCompanyData(resp[j]);
+	}	
+};
+
+var handleSearchTermsHelper = function(callback, dataObject) {
+	//console.log("doin ajax work")
+	$("#results_container").show();
+
 	$.ajax({
 		type: "POST",
 		dataType: "json",
 		//url: "http://startup-search.herokuapp.com/searchAPI",
 		url: "http://localhost:5000/searchAPI",
-		data: dataToSend,
+		data: dataObject,
 		success: function(data) {
-			console.log("ajax request done");
-			console.log(data);
+			//console.log("ajax request done");
+			//console.log(data);
+			callback(data);
 		}
 	});
-	console.log("DONE with ajax work")	
-
-
-	/*
-	$.getJSON("http://startup-search.herokuapp.com/search2?callback=?", dataToSend, function(data) {
-		console.log("ajax request done");
-		console.log(data);
-	});
-	*/
-
-	//console.log("end of handleSearchTerms()");
+	//console.log("DONE with ajax work")
 };
 
 
