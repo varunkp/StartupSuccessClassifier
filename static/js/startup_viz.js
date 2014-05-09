@@ -168,11 +168,19 @@ var parseCompanyData = function(currCompany) {
 
 		//var infoList = [logoString, name, relevanceContainer, yearFounded, totalFunding, status, location];
 
-		var htmlString = "<td class=\"logo\">" + logoString + "</td><td>" + name + "</td><td class=\"relevance\">" + relevanceContainer + "</td><td>" + yearFounded + "</td><td>" + totalFunding + "</td><td>" + status + "</td><td>" + location + "</td>";
+		//var htmlString = "<td class=\"logo\">" + logoString + "</td><td>" + name + "</td><td class=\"relevance\">" + relevanceContainer + "</td><td>" + yearFounded + "</td><td>" + totalFunding + "</td><td>" + status + "</td><td>" + location + "</td>";
+		var htmlString = "<td class=\"logo\">" + logoString + "</td><td>" + name + "</td><td class=\"relevance\">" + relevanceContainer + "</td><td>" + location + "</td>";
 
 		// append row to table
 		//console.log(permalink);
 		table.append("tr").attr("class", "results_table_row").attr("id", permalink).html(htmlString);
+
+		$(".results_table_row").hover(function(){
+			$(this).css('background-color', "#A8D4FF");
+		}, function(){
+			$(this).css('background-color', "#F6F7F8");
+		});
+
 		//console.log(htmlString);
 		//;
 
@@ -340,6 +348,11 @@ var getAllCompanyDataHelper = function(resp) {
 	$("#results_modal_overview_button").click(function() {
 		$("#results_modal_overview_container").toggle();
 	});
+	$("#results_modal_overview_button").hover(function(){
+		$(this).css('background-color', "#A8D4FF");
+	}, function(){
+		$(this).css('background-color', "#F6F7F8");
+	});	
 
 
 	modalHeader.append("div").attr("class","results_modal_button").attr("id","results_modal_url_button")
@@ -347,14 +360,22 @@ var getAllCompanyDataHelper = function(resp) {
 	$("#results_modal_url_button").click(function() {
 		window.open(resp.homepage_url);
 	});
-
+	$("#results_modal_url_button").hover(function(){
+		$(this).css('background-color', "#A8D4FF");
+	}, function(){
+		$(this).css('background-color', "#F6F7F8");
+	});	
 	
 	modalHeader.append("div").attr("class","results_modal_button").attr("id","results_modal_crunchbase_button")
 		.style("left","825px").style("top", "72px").append("p").text("Crunchbase");
 	$("#results_modal_crunchbase_button").click(function() {
 		window.open(resp.crunchbase_url);
 	});
-
+	$("#results_modal_crunchbase_button").hover(function(){
+		$(this).css('background-color', "#A8D4FF");
+	}, function(){
+		$(this).css('background-color', "#F6F7F8");
+	});	
 
 	// end - created modal header
 
