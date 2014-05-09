@@ -317,7 +317,7 @@ def getRelevance(companiesList,searchQuery):
         company["relevanceByTag"] = rel_by_tag
         company["relevanceByOverview"] = rel_by_ov
         if rel_by_ov != 0 and rel_by_tag != 0:
-          company['relevance'] = 0.5 * (rel_by_ov + rel_by_tag)
+          company['relevance'] = 0.8 * rel_by_ov + 0.2 * rel_by_tag
         else:
           company['relevance'] = max(rel_by_ov, rel_by_tag)
 
