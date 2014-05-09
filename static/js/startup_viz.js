@@ -305,14 +305,24 @@ var getAllCompanyDataHelper = function(resp) {
 	modalProfileList.append("li").style("margin", "11px 0px 11px 0px").html(tempString);
 
 	// fill in company location
-	var country = resp.offices[0].country_code;
-	var state = resp.offices[0].state_code;
-	var location = null;
-	if (typeof(state) != 'undefined' && state != null) {
-		location = state + ', ' + country;
+	//var country = "";
+	//var state = "";
+	var location = "";
+	if (resp.offices.length > 0) {
+		var office = resp.offices[0];
+		if (office.country_code != null) {
+			if (office.state_code != null) {
+				location = office.state_code + ', ' + office.country_code;
+			} else {
+				location = office.country_code;
+			}
+		} else {
+			location = "Unknown";
+		}
 	} else {
-		location = country;
+		location = "Unknown";
 	}
+
 	tempString = "<span style=\"color: #ABABAB\">Location: </span>" + location;
 	modalProfileList.append("li").style("margin", "11px 0px 0px 0px").html(tempString);
 
@@ -418,11 +428,21 @@ var getAllCompanyDataHelper = function(resp) {
 		};
 		trimmedFundingList.push(tempObj);
 	}
+
+	//console.log("trimmedFundingList:");
 	//console.log(trimmedFundingList);
 
+	var startQuarter = [0, 0];
+	var endQuarter = [0, 0];
+	if (trimmedFundingList.length > 0) {
+		startQuarter = [trimmedFundingList[0].funded_quarter, trimmedFundingList[0].funded_year];
+		endQuarter = [trimmedFundingList[trimmedFundingList.length-1].funded_quarter, trimmedFundingList[trimmedFundingList.length-1].funded_year];
+	}
+
 	// create dataArr for each quarter
-	var startQuarter = [trimmedFundingList[0].funded_quarter, trimmedFundingList[0].funded_year];
-	var endQuarter = [trimmedFundingList[trimmedFundingList.length-1].funded_quarter, trimmedFundingList[trimmedFundingList.length-1].funded_year];
+	//var startQuarter = [trimmedFundingList[0].funded_quarter, trimmedFundingList[0].funded_year];
+	//var endQuarter = [trimmedFundingList[trimmedFundingList.length-1].funded_quarter, trimmedFundingList[trimmedFundingList.length-1].funded_year];
+	
 	//console.log("startQuarter: " + startQuarter);
 	//console.log("endQuarter: " + endQuarter);
 
@@ -494,7 +514,11 @@ var getAllCompanyDataHelper = function(resp) {
 	var scaleX = d3.scale.linear().domain([0, data.length]).range([0, w]);
 
 	// Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
-	var maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
+	var maxRaised = 0;
+	if (allQuartersList.length > 0) {
+		maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
+	}
+	//var maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
 	/*
 	console.log("maxRaised: " + maxRaised);
 	console.log("h1: " + h1);
@@ -558,7 +582,6 @@ var getAllCompanyDataHelper = function(resp) {
 	    .attr("x", "200")
 	    .attr("y", "200")
 	    .attr("transform", "translate(" + 120 + "," + 75 + ")");
-
 	  	
 	var ticksArr = $.map(allQuartersList, function(data, index) {
 		//console.log(data);
