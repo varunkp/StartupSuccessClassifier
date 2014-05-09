@@ -195,7 +195,11 @@ def getCompaniesList(query,num,category_code):
       if "namespace" in returned_json["results"][resultNum] \
       and returned_json["results"][resultNum]["namespace"] == "company":
         company = returned_json["results"][resultNum]
-        print resultNum
+        print "company:"
+        print company
+
+
+        #print resultNum
         
         individual_company["name"]=company["name"]
 
@@ -203,55 +207,79 @@ def getCompaniesList(query,num,category_code):
         #   individual_company["overview"] = company["overview"]
 
         if "image" in company and company["image"] is not None:
-          img = company["image"]["available_sizes"][0][1]
-          #print img
-          individual_company["image"] = img
-          #individual_company["image1"]= company["image"]["available_sizes"][0][1]
+          if "available_sizes" in company["image"] and company["image"]["available_sizes"] is not None:
+            img = company["image"]["available_sizes"][0][1]
+
+            logoDimensions = company["image"]["available_sizes"][0][0]
+
+            individual_company["image"] = img
+            individual_company["logoHeight"] = logoDimensions[1]
+            individual_company["logoWidth"] = logoDimensions[0]
+          else:
+            individual_company["image"] = None
+            individual_company["logoHeight"] = None
+            individual_company["logoWidth"] = None
         else:
           individual_company["image"] = None
+          individual_company["logoHeight"] = None
+          individual_company["logoWidth"] = None
 
-        if "logoHeight" in company and company["logoHeight"] is not None:
-          individual_company["logoHeight"] = company["image"]["available_sizes"][0][0][0];
+        #print "individual_company:"
+        #print individual_company
+
+        '''
+        if company["image"]["available_sizes"] is not None:
+          individual_company["logoHeight"] = company["image"]["available_sizes"][0][0][0]
         else:
           individual_company["logoHeight"] = None
-
+        '''
         if "description" in company and company["description"] is not None:
           individual_company["description"] = company["description"]
         else:
           individual_company["description"] = None
-
+        '''
         if "logoWidth" in company and company["logoWidth"] is not None:
-          individual_company["logoWidth"] = company["image"]["available_sizes"][0][0][1];
+          individual_company["logoWidth"] = company["image"]["available_sizes"][0][0][1]
         else:
           individual_company["logoWidth"] = None
-
-        if "yearFounded" in company and company["yearFounded"] is not None:
-          individual_company["yearFounded"] = company["founded_year"];
+        '''
+        '''
+        if "founded_year" in company and company["founded_year"] is not None:
+          individual_company["yearFounded"] = company["founded_year"]
         else:
           individual_company["yearFounded"] = None
-
-        if "totalFunding" in company and company["totalFunding"] is not None:
-          individual_company["totalFunding"] = company["total_money_raised"];
+        '''
+        '''
+        if "total_money_raised" in company and company["total_money_raised"] is not None:
+          individual_company["totalFunding"] = company["total_money_raised"]
         else:
           individual_company["totalFunding"] = None
-
+        '''
+        '''
         if "ipo" in company and company["ipo"] is not None:
-          individual_company["status"] = company["ipo"];
+          individual_company["status"] = company["ipo"]
         else:
           individual_company["status"] = None
-
-        if "country_code" in company and company["offices"][0]["country_code"] is not None:
-          individual_company["country"] = company["offices"][0]["country_code"];
+        '''
+        if "offices" in company and company["offices"] is not None:
+          tempArr = company["offices"]
+          if len(tempArr) > 0:
+            individual_company["country"] = company["offices"][0]["country_code"]
+            individual_company["state"] = company["offices"][0]["state_code"]
+          else:
+            individual_company["country"] = None
+            individual_company["state"] = None
         else:
           individual_company["country"] = None
-
-        if "state_code" in company and company["offices"][0]["state_code"] is not None:
-          individual_company["state"] = company["offices"][0]["state_code"];
+          individual_company["state"] = None
+        '''
+        if "offices" in company and company["offices"][0]["state_code"] is not None:
+          individual_company["state"] = company["offices"][0]["state_code"]
         else:
           individual_company["state"] = None
-
+        '''
         if "permalink" in company and company["permalink"] is not None:
-          individual_company["permalink"] = company["permalink"];
+          individual_company["permalink"] = company["permalink"]
         else:
           individual_company["permalink"] = None
 
@@ -420,6 +448,7 @@ def getRelevance(companiesList,searchQuery):
         print 'Total Relevance ', l['relevance']
         if l['relevanceByTag'] != 0 or l['relevanceByOverview'] != 0:
           f.write(str(l['relevanceByTag']) + ', ' + str(l['relevanceByOverview']) + ', ' + str(l['relevance']) + '\n')
+
     return newList
 
 def getRelevanceByOverview(companiesList,searchQuery):

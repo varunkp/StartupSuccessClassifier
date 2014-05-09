@@ -24,8 +24,8 @@ $(document).ready(function() {
 	// render results table when user hits 'Enter' in searchbar
 	$("#keyword_search_bar").keypress(function(e) {
 		if (e.keyCode == 13) {
-			//handleSearchTerms(); // V2
-			showResults(); // V1
+			handleSearchTerms(); // V2
+			//showResults(); // V1
 		}
 	});
 
@@ -39,8 +39,8 @@ $(document).ready(function() {
 
 	// render results table when user clicks on button
 	$("#search_button").click(function() {
-		//handleSearchTerms(); // V2
-		showResults(); // V1
+		handleSearchTerms(); // V2
+		//showResults(); // V1
 	}); 
 });
 
@@ -62,8 +62,10 @@ var getCompanyData = function(callback, index) {
 		dataType: 'json',
 		async: false,
 		success: function(data) {
-			jsonList.push(data);
-			callback(data);
+			console.log("Crunchbase API response:");
+			console.log(data);
+			//jsonList.push(data);
+			//callback(data);
 		}
 	});
 };
@@ -106,36 +108,39 @@ var parseCompanyData = function(currCompany) {
 
 	if (typeof(currCompany) != 'undefined' && currCompany != null) {
 
-		var logoURL = currCompany.image.available_sizes[0][1]; // V1
-		//var logoURL = currCompany.image; // V2
-		var logoHeight = currCompany.image.available_sizes[0][0][0]; // V1
-		//var logoHeight = "150"; // V2
-		var logoWidth = currCompany.image.available_sizes[0][0][1]; // V1
-		//var logoWidth = "57"; // V2
+		//var logoURL = currCompany.image.available_sizes[0][1]; // V1
+		var logoURL = currCompany.image; // V2
+		//var logoHeight = currCompany.image.available_sizes[0][0][0]; // V1
+		var logoHeight = currCompany.logoWidth; // V2
+		//var logoWidth = currCompany.image.available_sizes[0][0][1]; // V1
+		var logoWidth = currCompany.logoHeight; // V2
 
 		var name = currCompany.name; // V1 and V2
 
 		var relevance = currCompany.relevance; // V1 and V2
 		i++;
 
-		var yearFounded = currCompany.founded_year; // V1
-		//var yearFounded = 2008; // V2
-		var totalFunding = currCompany.total_money_raised; // V1
-		//var totalFunding = "$1.5M"; // V2
-		var status = currCompany.ipo; // V1
-		//var status = "Operating"; // V2
+		//var yearFounded = currCompany.founded_year; // V1
+		var yearFounded = 0000; // V2
+		//var totalFunding = currCompany.total_money_raised; // V1
+		var totalFunding = "$0M"; // V2
+		//var status = currCompany.ipo; // V1
+		var status = "?????"; // V2
+		/*
 		if (typeof(status) != 'undefined' && status != null) {
 			status = "IPO";
 		} else {
 			status = "Operating";
 		}
-
-		var country = currCompany.offices[0].country_code; // V1
-		//var country = "USA"; // V2
-		var state = currCompany.offices[0].state_code; // V1
-		//var state = "CA"; // V2
+		*/
+		//var country = currCompany.offices[0].country_code; // V1
+		var country = currCompany.country; // V2
+		//var state = currCompany.offices[0].state_code; // V1
+		var state = currCompany.state; // V2
 		var location = null; // V1 and V2
-		if (typeof(state) != 'undefined' && state != null) {
+		if (country == null) {
+			location = "Unknown";
+		} else if (state != null) {
 			location = state + ', ' + country;
 		} else {
 			location = country;
@@ -265,9 +270,19 @@ var getAllCompanyDataHelper = function(resp) {
 	//var logoString = "<img src='" + logoURL + "' height='" + logoWidth + "px' width='" + logoHeight+ "px'>";
 	var logoBox = d3.select("#results_modal_logo");
 	// logoBox dimensions: height=90px, width=160px
-	logoBox.append("img").attr("src", logoURL).attr("height", logoWidth + "px").attr("width", logoHeight + "px")
-		.attr("max-width", "160px").attr("max-height", "90px").style("padding-top", ((90 - logoWidth) / 2) + "px");
-
+	logoBox.attr("max-height", "90px").attr("max-width", "160px");
+	
+	//logoBox.append("img").attr("src", logoURL).attr("height", logoWidth + "px").attr("width", logoHeight + "px")
+		//.attr("max-width", "160px").attr("max-height", "90px");
+	logoBox.append("img").attr("class", "resize_fit_center").attr("src", logoURL);
+		//.attr("max-height", "90px");
+		//.style("padding-top", ((90 - logoWidth) / 2) + "px");
+	
+	/*
+	logoBox.append("img").style("background-image", "url(" + logoURL + ")").style("background-repeat", "no-repeat")
+		.style("background-size", "contain").style("position", "absolute").style("left", "0").style("top", "0");
+		//.attr("max-width", "100%").attr("max-height", "100%").style("padding-top", ((90 - logoWidth) / 2) + "px");
+	*/
 	modalHeader.append("div").attr("id","results_modal_profile"); // wrapper for company info
 
 	d3.select("#results_modal_profile").append("ul")
@@ -627,8 +642,8 @@ var handleSearchTerms = function() {
 };
 
 var tempFunc2 = function(resp) {
-	console.log("in tempFunc2()");
-	console.log(resp);
+	//console.log("in tempFunc2()");
+	//console.log(resp);
 
 	for (var j = 0; j < resp.length; j++) {
 		parseCompanyData(resp[j]);
@@ -647,7 +662,8 @@ var handleSearchTermsHelper = function(callback, dataObject) {
 		data: dataObject,
 		success: function(data) {
 			//console.log("ajax request done");
-			//console.log(data);
+			console.log("Our API response:");
+			console.log(data);
 			callback(data);
 		}
 	});
