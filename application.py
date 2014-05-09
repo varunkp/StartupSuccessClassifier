@@ -4,9 +4,10 @@
 
 import string
 import flask
-from flask import request, flash, jsonify, Flask
+from flask import request, flash, jsonify, Flask, redirect, current_app
 import requests
 import json
+from functools import wraps
 from flask.ext.restful import Resource, Api
 # import relevance
 import pandas as pd
@@ -82,6 +83,21 @@ data = pd.read_csv(fn,error_bad_lines=False)
 data = data.applymap(lambda x: np.nan if isinstance(x, basestring) and x.isspace() else x)
 data = data.fillna('a')
 
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f(*args,**kwargs).data) + ')'
+            return current_app.response_class(content, mimetype='application/javascript')
+        else:
+            return f(*args, **kwargs)
+    return decorated_function
+
+
+
+
 class SearchAPI(Resource):
   def post(self):
         restQuery = request.form['restQuery']
@@ -94,6 +110,7 @@ api.add_resource(SearchAPI, '/searchAPI')
 
 @app.route('/searchAPI', methods=['POST','GET'])
 @crossdomain(origin='*')
+@support_jsonp
 def searchAPI(restQuery):
 
   searchTerm = restQuery 
@@ -113,7 +130,6 @@ def searchAPI(restQuery):
   #   idfs = find_idfs(companiesList)
   idfs_ov = find_idfs_overview(companiesList)
   idfs_tag = find_idfs(companiesList)
-
 
   # print idfs
 
