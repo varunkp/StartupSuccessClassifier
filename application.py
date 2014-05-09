@@ -313,6 +313,17 @@ def find_idfs(companiesList):
                 seen.add(t)
     return { t: float(len(companiesList)) / counts[t] for t in counts }
 
+def find_idfs_name(companyName):
+  seen = set()
+  counts = {}
+  tokenized_name = tokenize(companyName)
+  for t in tokenized_name:
+    if t not in seen:
+      counts.setdefault(t, 0.0)
+      counts[t] += 1
+      seen.add(t)
+  return { t: float(len(tokenized_name)) / counts[t] for t in counts }
+
 def find_idfs_overview(companiesList):
     counts = {}
     for companyDict in companiesList:
@@ -360,6 +371,7 @@ def getRelevance(companiesList,searchQuery):
     relevances = {}
     for company in companiesList:
         company_name = company['name']
+        company_name_string = str(company_name)
 
         company_tags = company['tag_list']
         company_tags_string = ' '.join(map(str, company_tags))
@@ -374,27 +386,42 @@ def getRelevance(companiesList,searchQuery):
         #return relevances
         rel_by_tag = 100.0 * cosine_similarity(searchQuery, company_tags_string, idfs_tag)
         rel_by_ov = 100.0 * cosine_similarity(searchQuery, company_ov_string, idfs_ov)
+
+        idfs_name = find_idfs_name(company_name)
+        any_in = [i for i in tokenize(searchQuery) if i in tokenize(company_name_string)]
+        if any_in:
+          rel_by_name = len(tokenize(company_name_string)) / 2.0 + 20.0 * cosine_similarity(searchQuery, company_name_string, idfs_name) 
+        else:
+          rel_by_name = 0.0
+
         company["relevanceByTag"] = rel_by_tag
         company["relevanceByOverview"] = rel_by_ov
+
         if rel_by_ov != 0 and rel_by_tag != 0:
           company['relevance'] = 0.8 * rel_by_ov + 0.2 * rel_by_tag
+        elif rel_by_tag == 0 and rel_by_ov == 0:
+          company['relevance'] = 0.0
         else:
           company['relevance'] = max(rel_by_ov, rel_by_tag)
+        company['relevance'] += rel_by_name
 
     newList = sorted(companiesList, key=lambda k: k['relevance'], reverse=True)
     print '--------------------------------------------SPITTING OUT COMPANY RELEVANCES ---------------------------------------'
-    for i, l in enumerate(newList):
-      print '--------------------NEXT COMPANY -------------------------'
-      print 'Company Number ', i
-      print 'Company Name: ' + l['name']
-      print 'Overview Relevance ', l['relevanceByOverview']
-      print 'Tag Relevance ', l['relevanceByTag']
-      print 'Description: ' + str(l['description'])
-      print 'Tag List ' + str(l['tag_list'])
-      print 'Overview ' + str(l['overview'])
-      print 'Total Relevance ', l['relevance']
+    with open("scores.txt", "a") as f:
+      for i, l in enumerate(newList):
+        print '--------------------NEXT COMPANY -------------------------'
+        print 'Company Number ', i
+        print 'Company Name: ' + l['name']
+        print 'Overview Relevance ', l['relevanceByOverview']
+        print 'Tag Relevance ', l['relevanceByTag']
+        # print 'Description: ' + str(l['description'])
+        print 'Tag List ' + str(l['tag_list'])
+        print 'Overview ' + str(l['overview'])
+        print 'Total Relevance ', l['relevance']
+        if l['relevanceByTag'] != 0 or l['relevanceByOverview'] != 0:
+          f.write(str(l['relevanceByTag']) + ', ' + str(l['relevanceByOverview']) + ', ' + str(l['relevance']) + '\n')
     return newList
-  
+
 def getRelevanceByOverview(companiesList,searchQuery):
     relevances = {}
     for company in companiesList:
