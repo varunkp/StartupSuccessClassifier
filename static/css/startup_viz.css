@@ -254,6 +254,17 @@ table, td, th
 	color: #318CE7;
 }
 
+#results_modal_graph_title {
+	width: 650px;
+	height: 30px;
+	/*border: 1px solid #6699CC;*/
+	position: absolute;
+	top: 40px;
+	left: 0px;
+	color: #318CE7;	
+	text-align: center;
+}
+
 #results_modal_overview_container {
 	width: 400px;
 	height: 300px;
@@ -296,7 +307,7 @@ table, td, th
 
 /* tell the SVG path to be a thin blue line without any area fill */
 path {
-	stroke: steelblue;
+	stroke: #6699CC;
 	stroke-width: 1;
 	fill: none;
 }
@@ -306,7 +317,7 @@ path {
 }
 
 .x.axis line {
-  stroke: lightgrey;
+  stroke: #ABABAB;
 }
 
 .x.axis .minor {
@@ -319,7 +330,7 @@ path {
 
 .y.axis line, .y.axis path {
   fill: none;
-  stroke: #000;
+  stroke: #ABABAB;
 }
 
 

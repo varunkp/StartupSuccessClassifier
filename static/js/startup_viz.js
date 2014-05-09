@@ -13,9 +13,9 @@
 
 //OAuth User Secret:b07e0c4d-0db4-4992-8850-374affa3ee5a
 
-var urlList = ["http://api.crunchbase.com/v/1/company/dropbox.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/facebook.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/microsoft.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/box.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?"];
+var urlList = ["http://api.crunchbase.com/v/1/company/dropbox.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/facebook.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/microsoft.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?","http://api.crunchbase.com/v/1/company/box.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?", "http://api.crunchbase.com/v/1/company/splunk.js?api_key=ndcq6rwvpenbagu7p9rkxpw6&callback=?"];
 var jsonList = [];
-var relevanceArray = [95, 50, 75, 5];
+var relevanceArray = [95, 50, 75, 5, 25];
 
 $(document).ready(function() {
 
@@ -24,18 +24,27 @@ $(document).ready(function() {
 	// render results table when user hits 'Enter' in searchbar
 	$("#keyword_search_bar").keypress(function(e) {
 		if (e.keyCode == 13) {
-			handleSearchTerms();
-			showResults();
+			//handleSearchTerms(); // V2
+			showResults(); // V1
 		}
 	});
 
+	// set up functionality for 'esc' key
+	$(document).keyup(function(e) {
+		if (e.keyCode == 27) {
+			$("#results_modal_container").hide();
+			$("#overlay").hide();
+		}
+	});		
+
 	// render results table when user clicks on button
 	$("#search_button").click(function() {
-		handleSearchTerms();
-		showResults();
+		//handleSearchTerms(); // V2
+		showResults(); // V1
 	}); 
 });
 
+// V1
 var showResults = function() {
 	// add code to reset results_container before rendering new results table
 
@@ -46,6 +55,7 @@ var showResults = function() {
 	}	
 }
 
+// V1
 var getCompanyData = function(callback, index) {	
 	$.ajax({
 		url: urlList[index],
@@ -58,6 +68,7 @@ var getCompanyData = function(callback, index) {
 	});
 };
 
+// V1
 var tempFunc = function(resp) {
 	//console.log("got to tempFunc");
 	//console.log("URL list length: " + urlList.length);
@@ -87,44 +98,57 @@ var sortCompaniesByRelevance = function(companyList) {
 
 var i = 0;
 var lastClicked = null;
+var counter = 0;
 
+// V1 and V2
 var parseCompanyData = function(currCompany) {
 	//console.log("inside parseCompanyData()");
 
 	if (typeof(currCompany) != 'undefined' && currCompany != null) {
 
-		//console.log(currCompany);
+		var logoURL = currCompany.image.available_sizes[0][1]; // V1
+		//var logoURL = currCompany.image; // V2
+		var logoHeight = currCompany.image.available_sizes[0][0][0]; // V1
+		//var logoHeight = "150"; // V2
+		var logoWidth = currCompany.image.available_sizes[0][0][1]; // V1
+		//var logoWidth = "57"; // V2
 
-		var logoURL = currCompany.image.available_sizes[0][1];
-		var logoHeight = currCompany.image.available_sizes[0][0][0];
-		var logoWidth = currCompany.image.available_sizes[0][0][1];
-		var name = currCompany.name;
+		var name = currCompany.name; // V1 and V2
 
-		var relevance = currCompany.relevance; // get this from ML output
+		var relevance = currCompany.relevance; // V1 and V2
 		i++;
 
-		var yearFounded = currCompany.founded_year;
-		var totalFunding = currCompany.total_money_raised;
-		var status = currCompany.ipo;
+		var yearFounded = currCompany.founded_year; // V1
+		//var yearFounded = 2008; // V2
+		var totalFunding = currCompany.total_money_raised; // V1
+		//var totalFunding = "$1.5M"; // V2
+		var status = currCompany.ipo; // V1
+		//var status = "Operating"; // V2
 		if (typeof(status) != 'undefined' && status != null) {
 			status = "IPO";
 		} else {
 			status = "Operating";
 		}
 
-		var country = currCompany.offices[0].country_code;
-		var state = currCompany.offices[0].state_code;
-		var location = null;
+		var country = currCompany.offices[0].country_code; // V1
+		//var country = "USA"; // V2
+		var state = currCompany.offices[0].state_code; // V1
+		//var state = "CA"; // V2
+		var location = null; // V1 and V2
 		if (typeof(state) != 'undefined' && state != null) {
 			location = state + ', ' + country;
 		} else {
 			location = country;
 		}
 
-		var permalink = currCompany.permalink; // use this as id of row
+		var permalink = currCompany.permalink; // use this as id of row // V1
+		//var permalink = "dropbox" + counter; // V2
+		//counter = counter + 1; // V2
+
+		//console.log("done setting up everything up until permalink");
 
 		var colorScale = d3.scale.linear().domain([0,100]).interpolate(d3.interpolateHsl).range(["#FF0000","#3CF057"]);
-		var sizeScale = d3.scale.linear().domain([0,100]).range([0,94]);
+		var sizeScale = d3.scale.linear().domain([0,100]).range([1,94]);
 		var relevanceColor = colorScale(relevance);
 		var barSize = Math.floor(sizeScale(relevance));
 
@@ -142,13 +166,27 @@ var parseCompanyData = function(currCompany) {
 		var htmlString = "<td class=\"logo\">" + logoString + "</td><td>" + name + "</td><td class=\"relevance\">" + relevanceContainer + "</td><td>" + yearFounded + "</td><td>" + totalFunding + "</td><td>" + status + "</td><td>" + location + "</td>";
 
 		// append row to table
+		//console.log(permalink);
 		table.append("tr").attr("class", "results_table_row").attr("id", permalink).html(htmlString);
+		//console.log(htmlString);
+		//;
+
+		//.html(htmlString);
+		//var permalinkString = "#" + permalink;
+		//console.log(permalinkString);
+		//var currRow = d3.select(permalinkString).html("<h1>WHY OH WHY</h1>");
+		//console.log(table);
+
+		//console.log("htmlString:");
+		//console.log(htmlString);
+		//console.log(permalink);
+		//console.log("done setting up everything up");
 
 		/* 
 		* Now that table exists, add interactivity and modals.
 		* This is the 2nd main execution loop.
 		*/
-
+		
 		// need the .unbind('click') because for some reason each row has 4 events bound to it instead of 1
 		$(".results_table_row").unbind('click').click(function(e) {
 			var currId = $(this).attr("id");
@@ -167,20 +205,22 @@ var parseCompanyData = function(currCompany) {
 			getAllCompanyData(getAllCompanyDataHelper, searchUrl)
 
 		});
-
+		
 	}
 };
 
 var getAllCompanyData = function(callback, url) {
-	//console.log("about to make ajax request");
+	console.log("beginning of getAllCompanyData()");
 	$.ajax({
 		url: url,
 		dataType: 'json',
 		async: false,
 		success: function(data) {
+			console.log("done with ajax request in getAllCompanyData()");
 			callback(data);
 		}
 	});
+	console.log("end of getAllCompanyData()");
 };
 
 var getAllCompanyDataHelper = function(resp) {
@@ -332,15 +372,15 @@ var getAllCompanyDataHelper = function(resp) {
 			} else if (investor.organization != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.organization.permalink;
 				var txt = investor.organization.name;	
-				investorList.append("li").append("a").attr("href", str).text(txt);			
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);			
 			} else if (investor.person != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.person.permalink;
 				var txt = investor.person.name;
-				investorList.append("li").append("a").attr("href", str).text(txt);	
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);	
 			} else if (investor.financial_org != null) {
 				var str = "http://www.crunchbase.com/organization/" + investor.financial_org.permalink;
 				var txt = investor.financial_org.name;
-				investorList.append("li").append("a").attr("href", str).text(txt);	
+				investorList.append("li").append("a").attr("href", str).attr("target", "blank").text(txt);	
 			}
 		}
 	}
@@ -420,78 +460,162 @@ var getAllCompanyDataHelper = function(resp) {
 	// create wrapper for quarterly funding line graph
 	modalContent.append("div").attr("id", "results_modal_graph_container");
 
-	/*
+	var graphContainer = d3.select("#results_modal_graph_container");
+
+	// set up graph title 
+	graphContainer.append("div").attr("id","results_modal_graph_title").append("h2").text("Total Funding Over Time (Quarterly)");
+	
 	// dimensions : width: 650px; height: 368px;
 	var m = [80, 80, 80, 80]; // margins
-	var w = 650 - m[1] - m[3];
-	var h = 368 - m[2] - m[4];
+	//var w = 650 - m[1] - m[3];
+	var w = 490;
+	//var h = 368 - m[2] - m[4];
+	//var h1 = 368 - m[2] - m[4];
+	var h = 208;
 
 	var data = allQuartersList;
 
 	// X scale will fit all values from data[] within pixels 0-w
-	var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
+	var scaleX = d3.scale.linear().domain([0, data.length]).range([0, w]);
 
 	// Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
 	var maxRaised = allQuartersList[allQuartersList.length-1].raised_total;
-	console.log(maxRaised);
-	var y = d3.scale.linear().domain([0, maxRaised]).range([h, 0]);
+	/*
+	console.log("maxRaised: " + maxRaised);
+	console.log("h1: " + h1);
+	console.log(typeof(h1));
+	console.log("w: " + w);
+	console.log(typeof(w));
+	*/
+
+	//console.log(typeof(maxRaised));
+	//var scaleY = d3.scale.linear().domain([0, maxRaised]).range([h, 0]);
+
+	//1107200000
+	//1000000000000
+	//var linearScale = d3.scale.linear().domain([0,1107200000]).range([208,0]);
+	var linearScale = d3.scale.linear().domain([0,maxRaised]).range([h,0]);
+	//console.log("linearScale(0): " + linearScale(0));
+	//console.log("linearScale(900): " + linearScale(900));
+
+	//console.log("scaleY(0): " + scaleY(0));
+	//console.log("scaleY(110720000): " + scaleY(110720000));
 
 	// create a line function that can convert data[] into x and y points
 	var line = d3.svg.line()
 		// assign the X function to plot our line as we wish
 		.x(function(d,i) { 
+			//console.log("in x:");
 			// verbose logging to show what's actually being done
-			console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+			//console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + scaleX(i) + ' using our xScale.');
 			// return the X coordinate where we want to plot this datapoint
-			return x(i); 
+			return scaleX(i); 
 		})
 		.y(function(d) { 
+			//console.log("in y:");
+			var raisedMoney = d.raised_total;
+			//console.log(raisedMoney);
+			//console.log(typeof(raisedMoney));			
 			// verbose logging to show what's actually being done
-			console.log('Plotting Y value for data point: ' + d.raised_total + ' to be at: ' + y(d.raised_total) + " using our yScale.");
+			//console.log('Plotting Y value for data point: ' + raisedMoney + ' to be at: ' + linearScale(raisedMoney) + " using our yScale.");
 			// return the Y coordinate where we want to plot this datapoint
-			return y(d.raised_total); 
+			return linearScale(raisedMoney);
 		});
 
+	
 	// Add an SVG element with the desired dimensions and margin.
-	var graph = d3.select("#results_modal_graph_container").append("svg:svg")
-		.attr("width", w + m[1] + m[3])
-		.attr("height", h + m[0] + m[2])
-	    .append("svg:g")
-	    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");	
+	var graph = d3.select("#results_modal_graph_container");
 
+	// add SVG graph (canvas) container for line graph
+	graph.append("svg:svg")
+		.attr("width", "620px")
+		.attr("height", "330px")
+		.attr("id", "svg_canvas")
+		.style("position", "absolute")
+		.style("top", "19px")
+		.style("left", "15px")
+		.style("border", "1px solid black");
+
+	// add SVG graph in coordinate space
+	var svgCanvas = d3.select("#svg_canvas");
+	svgCanvas.append("svg:g")
+		.attr("id", "graph_group")
+	    .attr("x", "200")
+	    .attr("y", "200")
+	    .attr("transform", "translate(" + 120 + "," + 75 + ")");
+
+	  	
+	var ticksArr = $.map(allQuartersList, function(data, index) {
+		//console.log(data);
+		var toReturn = " ";
+		if (data.funded_quarter == 1) {
+			var currYear = data.funded_year;
+			toReturn = "'" + data.funded_year.toString().substring(2);	
+			return toReturn;
+		} 
+		return toReturn;
+	});
+
+
+	var rangeArr = [];
+	for (var l = 0; l < allQuartersList.length; l++) {
+		rangeArr.push(scaleX(l));
+	}
+
+
+	// change above to use ordinal scale
+	var xTickScale = d3.scale.ordinal().rangeRoundBands([0, w]);
 	// create x-axis
-	var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true);
+	var xAxis = d3.svg.axis().scale(xTickScale).orient("bottom").ticks(allQuartersList.length).tickSubdivide(true).tickSize(-h);
+	xTickScale.domain(ticksArr);
+
+	// TODO: set up ticks correctly
+
+
+
+	var group = d3.select("#graph_group");
+
+	// TODO: label x-axis
+
 	// Add the x-axis.
-	graph.append("svg:g")
-	      .attr("class", "x axis")
-	      .attr("transform", "translate(0," + h + ")")
-	      .call(xAxis);	
+	group.append("svg:g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + h + ")")
+	    .attr("x", "200")
+	    .attr("y", "200")
+	    .call(xAxis);	
+
+
 
 	// create left yAxis
-	var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+	var yAxisLeft = d3.svg.axis().scale(linearScale).ticks(4).orient("left").tickFormat(function(d) {
+		var toReturn = "$" + d;
+		toReturn = toReturn.substring(0, toReturn.length-6);
+		toReturn = toReturn + "M";
+		return toReturn;
+	}).tickSize(-w);
+
 	// Add the y-axis to the left
-	graph.append("svg:g")
+	group.append("svg:g")
 	      .attr("class", "y axis")
-	      .attr("transform", "translate(-25,0)")
+	      .attr("transform", "translate(-5,0)")
 	      .call(yAxisLeft);
 
 	// Add the line by appending an svg:path element with the data line we created above
 	// do this AFTER the axes above so that the line is above the tick-lines
-	graph.append("svg:path").attr("d", line(data));
+	group.append("svg:path").attr("d", line(data));
 	
-	*/
+	
+	
 	
 	// set up functionality for close button
 	$("#close_modal").click(function() {
 		$("#results_modal_container").hide();
 		$("#overlay").hide();
+		$(this).unbind();
 	});
 
 };
-
-var dateToQuarter = function(month, year) {
-
-}
 
 var handleSearchTerms = function() {
 	searchTermStr = $("#keyword_search_bar").val();
@@ -499,36 +623,35 @@ var handleSearchTerms = function() {
 	var dataToSend = {
 		restQuery: searchTermStr
 	};
+	handleSearchTermsHelper(tempFunc2, dataToSend);
+};
 
-	// PJ: This is where the call to retrieve the data from the API should be
-	// Both of the below are doing the same thing, I just split them up to see
-	// if there was anything I was missing. I tried adding the '?callback=?'
-	// part to try to get around the CORS stuff.
+var tempFunc2 = function(resp) {
+	console.log("in tempFunc2()");
+	console.log(resp);
 
-	
-	console.log("doin ajax work")
+	for (var j = 0; j < resp.length; j++) {
+		parseCompanyData(resp[j]);
+	}	
+};
+
+var handleSearchTermsHelper = function(callback, dataObject) {
+	//console.log("doin ajax work")
+	$("#results_container").show();
+
 	$.ajax({
 		type: "POST",
 		dataType: "json",
 		//url: "http://startup-search.herokuapp.com/searchAPI",
 		url: "http://localhost:5000/searchAPI",
-		data: dataToSend,
+		data: dataObject,
 		success: function(data) {
-			console.log("ajax request done");
-			console.log(data);
+			//console.log("ajax request done");
+			//console.log(data);
+			callback(data);
 		}
 	});
-	console.log("DONE with ajax work")	
-
-
-	/*
-	$.getJSON("http://startup-search.herokuapp.com/search2?callback=?", dataToSend, function(data) {
-		console.log("ajax request done");
-		console.log(data);
-	});
-	*/
-
-	//console.log("end of handleSearchTerms()");
+	//console.log("DONE with ajax work")
 };
 
 

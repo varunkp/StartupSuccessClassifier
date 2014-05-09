@@ -508,6 +508,7 @@ var handleSearchTerms = function() {
 	
 	$.ajax({
 		dataType: "json",
+		type: "POST",
 		url: "http://startup-search.herokuapp.com/searchAPI",
 		data: dataToSend,
 		success: function(data) {
