@@ -195,6 +195,51 @@ def getCompaniesList(query,num,category_code):
         else:
           individual_company["image"] = None
 
+        if "logoHeight" in company and company["logoHeight"] is not None:
+          individual_company["logoHeight"] = company["image"]["available_sizes"][0][0][0];
+        else:
+          individual_company["logoHeight"] = None
+
+        if "description" in company and company["description"] is not None:
+          individual_company["description"] = company["description"]
+        else:
+          individual_company["description"] = None
+
+        if "logoWidth" in company and company["logoWidth"] is not None:
+          individual_company["logoWidth"] = company["image"]["available_sizes"][0][0][1];
+        else:
+          individual_company["logoWidth"] = None
+
+        if "yearFounded" in company and company["yearFounded"] is not None:
+          individual_company["yearFounded"] = company["founded_year"];
+        else:
+          individual_company["yearFounded"] = None
+
+        if "totalFunding" in company and company["totalFunding"] is not None:
+          individual_company["totalFunding"] = company["total_money_raised"];
+        else:
+          individual_company["totalFunding"] = None
+
+        if "ipo" in company and company["ipo"] is not None:
+          individual_company["status"] = company["ipo"];
+        else:
+          individual_company["status"] = None
+
+        if "country_code" in company and company["offices"][0]["country_code"] is not None:
+          individual_company["country"] = company["offices"][0]["country_code"];
+        else:
+          individual_company["country"] = None
+
+        if "state_code" in company and company["offices"][0]["state_code"] is not None:
+          individual_company["state"] = company["offices"][0]["state_code"];
+        else:
+          individual_company["state"] = None
+
+        if "permalink" in company and company["permalink"] is not None:
+          individual_company["permalink"] = company["permalink"];
+        else:
+          individual_company["permalink"] = None
+
         individual_company["tag_list"] = getTagListFromPandas(individual_company["name"])
         individual_company["overview"] = getOverviewFromPandas(individual_company["name"])
 
@@ -321,6 +366,7 @@ def getRelevance(companiesList,searchQuery):
       print 'Company Name: ' + l['name']
       print 'Overview Relevance ', l['relevanceByOverview']
       print 'Tag Relevance ', l['relevance']
+      print 'Description: ' + str(l['description'])
       print 'Tag List ' + str(l['tag_list'])
       print 'Overview ' + str(l['overview'])
       print '--------------------NEXT COMPANY -------------------------'
